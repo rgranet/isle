@@ -1,0 +1,14 @@
+"CFBundleDisplayName" = "Isle";
+"NSAppleEventsUsageDescription" = "Isle, Spotify ve Apple Music'i kontrol etmek için AppleScript kullanır.";
+"NSBluetoothAlwaysUsageDescription" = "Isle, ses aygıtları bağlandığında bunları algılamak ve HUD'da pil durumlarını göstermek için Bluetooth erişimine ihtiyaç duyar.";
+"NSCalendarsFullAccessUsageDescription" = "Takvim etkinliklerini çentik içinde gösterir.";
+"NSCalendarsUsageDescription" = "Takvim modu için gereklidir.";
+"NSCameraUsageDescription" = "Ayna modu için kameranıza ihtiyaç duyuyoruz.";
+"NSDesktopFolderUsageDescription" = "Isle, ekran görüntülerini masaüstünüze kaydetmek için erişime ihtiyaç duyar.";
+"NSDocumentsFolderUsageDescription" = "Isle, rafa sürüklenen dosyaları kaydetmek ve okumak için erişime ihtiyaç duyar.";
+"NSDownloadsFolderUsageDescription" = "Isle, İndirilenler klasöründeki dosyaları okumak için erişime ihtiyaç duyar.";
+"NSLocationUsageDescription" = "Isle, doğru kilit ekranı hava durumunu göstermek için konumunuzu kullanır.";
+"NSLocationWhenInUseUsageDescription" = "Isle, doğru kilit ekranı hava durumunu göstermek için konumunuzu kullanır.";
+"NSRemindersUsageDescription" = "Isle, anımsatıcılarınızı göstermek için Anımsatıcılar erişimine ihtiyaç duyar.";
+"NSAudioCaptureUsageDescription" = "Isle, gerçek zamanlı müzik dalga biçimi görselleştiricisini göstermek için ses yakalama iznine ihtiyaç duyar.";
+"NSScreenCaptureUsageDescription" = "Isle, yapay zeka asistanı özelliği için ekran görüntüleri yakalamak üzere ekran kaydı iznine ihtiyaç duyar.";

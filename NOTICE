@@ -1,0 +1,56 @@
+Isle — NOTICE
+
+Isle is a derivative work combining source from two upstream projects,
+both licensed under the GNU General Public License, version 3.0 (GPL-3.0).
+Accordingly, Isle is distributed under the GPL-3.0. See the LICENSE file
+for the full license text.
+
+================================================================================
+UPSTREAM 1 — Atoll (Dynamic Island for macOS base)
+================================================================================
+
+Source:    https://github.com/Ebullioscopic/Atoll
+License:   GPL-3.0
+Role:      Provides the macOS notch rendering surface, live activities
+           framework, media controllers, system stats, lock-screen
+           widgets, and the SwiftUI app shell that Isle is built on.
+
+Atoll major contributors (see https://github.com/Ebullioscopic/Atoll/graphs/contributors):
+  - Ebullioscopic (Hariharan Mudaliar) — maintainer
+  - Atoll contributors community
+
+Atoll is itself a derivative work of boring.notch
+(https://github.com/TheBoredTeam/boring.notch), also GPL-3.0, by
+TheBoredTeam. Original notch interaction model, media player
+integration, AirDrop surface, file dock, and calendar event display
+patterns originate there.
+
+================================================================================
+UPSTREAM 2 — open-vibe-island (AI coding-agent integration backend)
+================================================================================
+
+Source:    https://github.com/Octane0411/open-vibe-island
+License:   GPL-3.0
+Role:      Provides the agent hook installer model, per-agent adapter
+           pattern, and event-bus schema used by Isle's coding-agent
+           live activities (Claude Code, Codex, Cursor, OpenCode,
+           Gemini CLI, Kimi, Aider, Continue, Goose, Block Goose).
+
+open-vibe-island major contributors:
+  - Octane0411 — maintainer
+  - open-vibe-island contributors community
+
+================================================================================
+COMBINED LICENSE
+================================================================================
+
+Because both upstreams are GPL-3.0 and Isle incorporates substantial
+portions of each, Isle as a whole is licensed under GPL-3.0. Any
+distribution of Isle in source or binary form must comply with the
+GPL-3.0 terms, including provision of corresponding source.
+
+Additional third-party credits inherited from the Atoll upstream
+(Alcove, Stats, Open-Meteo, SkyLightWindow, rtaudio, SwiftTerm, Wick)
+are listed in the README under "Acknowledgements".
+
+Product bundle identifier: com.withmii.isle
