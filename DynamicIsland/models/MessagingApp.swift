@@ -62,16 +62,18 @@ enum MessagingApp: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    /// The exact string macOS uses as the dock tile title for this app.
-    /// `DockBadgeReader` keys badges by this title since AX returns the
-    /// display name, not the bundle ID.
-    var dockTitle: String {
+    /// Strings macOS may use as the dock tile title for this app.
+    /// `DockBadgeReader` keys badges by title since AX returns the display
+    /// name, not the bundle ID. Multiple variants are supported because
+    /// some apps ship multiple builds with distinct display names (Discord
+    /// Stable / PTB / Canary / Development; new Teams vs classic).
+    var dockTitles: [String] {
         switch self {
-        case .whatsapp: return "WhatsApp"
-        case .teams:    return "Microsoft Teams"
-        case .slack:    return "Slack"
-        case .imessage: return "Messages"
-        case .discord:  return "Discord"
+        case .whatsapp: return ["WhatsApp"]
+        case .teams:    return ["Microsoft Teams", "Microsoft Teams (work or school)"]
+        case .slack:    return ["Slack"]
+        case .imessage: return ["Messages"]
+        case .discord:  return ["Discord", "Discord PTB", "Discord Canary", "Discord Development"]
         }
     }
 
@@ -109,6 +111,17 @@ enum MessagingApp: String, CaseIterable, Identifiable, Sendable {
         case .slack:    return .messagingAppSlackEnabled
         case .imessage: return .messagingAppIMessageEnabled
         case .discord:  return .messagingAppDiscordEnabled
+        }
+    }
+
+    /// Whether a non-numeric dock badge (e.g. just `●`) should count as
+    /// an unread indicator. Discord opts out: its numeric badge is
+    /// DMs/@mentions only, while the dot fires for any unread server
+    /// channel, which is too noisy to surface in the notch.
+    var acceptsNonNumericBadge: Bool {
+        switch self {
+        case .discord: return false
+        case .whatsapp, .teams, .slack, .imessage: return true
         }
     }
 

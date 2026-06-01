@@ -541,6 +541,19 @@ public final class BridgeServer: @unchecked Sendable {
             let responsePreview = payload.toolResponsePreview
             let summary = responsePreview.map { "Bash finished: \(command) · \($0)" } ?? "Bash finished: \(command)"
 
+            // The tool actually ran → any prior pending approval/question
+            // for this session has been resolved out-of-band (likely in the
+            // terminal). Emit this BEFORE the activity update so the
+            // SessionState .waitingForApproval guard releases first.
+            emit(
+                .actionableStateResolved(
+                    ActionableStateResolved(
+                        sessionID: payload.sessionID,
+                        summary: summary,
+                        timestamp: .now
+                    )
+                )
+            )
             emit(
                 .activityUpdated(
                     SessionActivityUpdated(
@@ -758,6 +771,19 @@ public final class BridgeServer: @unchecked Sendable {
                 return payload.implicitStartSummary
             }()
 
+            // The tool actually ran → any prior pending approval/question
+            // for this session has been resolved out-of-band (user replied
+            // in the terminal TUI). Emit BEFORE activityUpdated so the
+            // SessionState .waitingForApproval guard releases first.
+            emit(
+                .actionableStateResolved(
+                    ActionableStateResolved(
+                        sessionID: payload.sessionID,
+                        summary: summary,
+                        timestamp: .now
+                    )
+                )
+            )
             emit(
                 .activityUpdated(
                     SessionActivityUpdated(
@@ -777,11 +803,23 @@ public final class BridgeServer: @unchecked Sendable {
             synchronizeClaudeMetadata(for: payload)
             pendingClaudeToolContexts.removeValue(forKey: payload.permissionCorrelationKey)
 
+            let failureSummary = payload.error ?? "\(payload.resolvedAgentTool.displayName) tool failed."
+            // The tool ran (even if it errored) → any prior pending
+            // approval/question has been resolved out-of-band.
+            emit(
+                .actionableStateResolved(
+                    ActionableStateResolved(
+                        sessionID: payload.sessionID,
+                        summary: failureSummary,
+                        timestamp: .now
+                    )
+                )
+            )
             emit(
                 .activityUpdated(
                     SessionActivityUpdated(
                         sessionID: payload.sessionID,
-                        summary: payload.error ?? "\(payload.resolvedAgentTool.displayName) tool failed.",
+                        summary: failureSummary,
                         phase: payload.isInterrupt == true ? .completed : .running,
                         timestamp: .now
                     )
@@ -1035,6 +1073,17 @@ public final class BridgeServer: @unchecked Sendable {
             synchronizeOpenCodeJumpTarget(for: payload)
             synchronizeOpenCodeMetadata(for: payload)
             let summary = payload.toolName.map { "\($0) finished." } ?? "OpenCode tool finished."
+            // Tool ran → any prior pending approval has been resolved
+            // out-of-band (likely in the OpenCode TUI).
+            emit(
+                .actionableStateResolved(
+                    ActionableStateResolved(
+                        sessionID: payload.sessionID,
+                        summary: summary,
+                        timestamp: .now
+                    )
+                )
+            )
             emit(
                 .activityUpdated(
                     SessionActivityUpdated(

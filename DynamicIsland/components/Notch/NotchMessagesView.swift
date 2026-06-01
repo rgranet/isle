@@ -110,16 +110,16 @@ struct NotchMessagesView: View {
     // MARK: Empty / disabled states
 
     private var emptyState: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "checkmark.circle")
-                .font(.system(size: 22))
-                .foregroundStyle(.tertiary)
+        VStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 30, weight: .light))
+                .foregroundStyle(.green.opacity(0.85))
             Text("Inbox zero")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.9))
             Text("No unread messages in any monitored app.")
-                .font(.system(size: 10))
-                .foregroundStyle(.tertiary)
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
 

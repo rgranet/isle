@@ -59,9 +59,14 @@ enum DockBadgeReader {
 
         var result: [String: String] = [:]
         for item in dockItems {
-            guard let title = stringAttribute(item, kAXTitleAttribute) else {
+            guard let rawTitle = stringAttribute(item, kAXTitleAttribute) else {
                 continue
             }
+            // WhatsApp (and other Catalyst apps) ship a CFBundleDisplayName
+            // prefixed with U+200E LEFT-TO-RIGHT MARK. The Dock surfaces
+            // that raw display name via AX, so equality checks against
+            // "WhatsApp" silently fail. Strip invisible bidi marks here.
+            let title = rawTitle.strippingBidiMarks()
             // AXStatusLabel is undocumented but standard on dock tiles for
             // the badge text. It's nil/empty when no badge.
             if let badge = stringAttribute(item, "AXStatusLabel"),
@@ -113,6 +118,14 @@ enum DockBadgeReader {
         return (trusted: trusted, functional: functional, dockBadgesFound: badges.count)
     }
 
+    /// Raw `[dockTitle: badgeText]` snapshot exposed to Settings so the
+    /// user can see exactly what each app puts in its Dock badge — handy
+    /// when filtering rules need tuning (e.g. Discord's mention vs unread
+    /// indicators).
+    static func rawSnapshot() -> [String: String] {
+        readAllBadges()
+    }
+
     // MARK: helpers
 
     private static func stringAttribute(_ element: AXUIElement, _ attribute: String) -> String? {
@@ -126,3 +139,13 @@ enum DockBadgeReader {
         return ref as? String
     }
 }
+
+private extension String {
+    /// Removes invisible Unicode bidirectional formatting marks (LRM, RLM,
+    /// ALM) so equality checks against canonical names succeed.
+    func strippingBidiMarks() -> String {
+        let marks: Set<Character> = ["\u{200E}", "\u{200F}", "\u{061C}"]
+        return String(filter { !marks.contains($0) })
+    }
+}
+

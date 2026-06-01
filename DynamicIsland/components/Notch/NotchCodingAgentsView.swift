@@ -191,16 +191,16 @@ struct NotchCodingAgentsView: View {
     // MARK: Empty / disabled
 
     private var emptyState: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "circle.dashed")
-                .font(.system(size: 22))
-                .foregroundStyle(.tertiary)
+        VStack(spacing: 8) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 30, weight: .light))
+                .foregroundStyle(.purple.opacity(0.75))
             Text("No active coding sessions")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.9))
             Text("Sessions opened in Claude Code over the last 24h will appear here.")
-                .font(.system(size: 10))
-                .foregroundStyle(.tertiary)
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.55))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
         }
