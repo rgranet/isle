@@ -135,14 +135,19 @@ final class MessagingAppMonitor: ObservableObject {
             let isRunning = app.bundleIDs.contains { runningBundleIDs.contains($0) }
             guard isRunning else { continue }
 
-            // Look up the dock tile by its title. macOS uses the same
+            // Look up the dock tile by title. macOS uses the same
             // localized display name in the Dock as in the menu bar.
-            guard let badge = badges[app.dockTitle] else { continue }
+            // Try each known variant (e.g. "Discord", "Discord Canary")
+            // and take the first match.
+            guard let badge = app.dockTitles.lazy.compactMap({ badges[$0] }).first else { continue }
             if let count = parsedCount(from: badge), count > 0 {
                 result[app] = count
-            } else if !badge.isEmpty {
+            } else if !badge.isEmpty, app.acceptsNonNumericBadge {
                 // Some apps render a non-numeric badge (e.g. "●" or "!");
-                // count as 1 so we still surface the indicator.
+                // count as 1 so we still surface the indicator. Discord
+                // opts out: its numeric badge is DMs/mentions only, and
+                // the non-numeric dot fires for any unread server channel
+                // — far too noisy to surface in the notch.
                 result[app] = 1
             }
         }

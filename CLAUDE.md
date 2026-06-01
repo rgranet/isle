@@ -281,6 +281,8 @@ To add support for, e.g., a new agent called "Foo":
 - **Resolve doesn't go through `emit()`.** BridgeServer's `handle(.resolvePermission)` mutates `localState` directly. My public `resolvePermission(sessionID:resolution:)` re-fires `onSessionsChanged` manually after `handle` returns — don't remove that.
 - **Demo sessions concept is gone.** A simulation feature was added then removed at user's request. Code is clean of `.demo` origin branches now.
 - **Atoll attribution in GPL headers.** A bulk `Atoll → Isle` sed pass overwrote those once; we restored them. If you ever do another bulk rebrand, exclude `* Atoll Contributors`, `* Modified and adapted for Atoll`, etc.
+- **Dock badge title equality is fragile.** macOS Catalyst apps ship `CFBundleDisplayName` prefixed with invisible Unicode bidi marks (e.g. WhatsApp = `‎WhatsApp` with `U+200E`). `DockBadgeReader.strippingBidiMarks()` normalises titles before the dictionary insert. If you add a new app to `MessagingApp.dockTitles` and it "silently fails to match", check the raw title in Settings → Messaging → Raw Dock badges (debug).
+- **`activityUpdated(.running)` preserves pending approval state by design.** SessionState's `preservesActionableState` heuristic refuses to clear `permissionRequest` when a generic `.running` activity event arrives mid-approval. The only way out is `actionableStateResolved` / `sessionCompleted` / a new `permissionRequested`. Every PostToolUse / PostToolUseFailure path in `BridgeServer` MUST emit `actionableStateResolved` before `activityUpdated`, otherwise stale permission cards stick on screen when the user answers in the terminal TUI.
 
 ## 8. Known limitations / deferred work
 
@@ -290,6 +292,7 @@ To add support for, e.g., a new agent called "Foo":
 - **macOS system UNUserNotification** as fallback when Isle isn't running on the active display — not implemented.
 - **Multi-session attention** works but the closed-notch badge only shows the first attention session. Pulse logic could be smarter for >1.
 - **Sparkle hosting** — feed URL `https://updates.withmii.com/isle/appcast.xml` is a placeholder. v1.0 ships with auto-update disabled.
+- **Bluetooth HUD animations missing** — when pushing the initial commit to `github.com/rgranet/isle`, all Git LFS files were dropped (they were never resolved locally, just pointer stubs from the shallow Atoll clone). The repo no longer ships the AirPods/Beats 3D `.mov` animations in `DynamicIsland/BluetoothHUDAnimations/` (airpods, airpodsGen3/Gen4/Max/Pro/Pro3, beatssolo, beatsstudio) nor `DynamicIslandSamples/dynamicislandscreenrecord.gif`. `.gitattributes` was also emptied so no new LFS tracking is active. **TODO**: source replacement assets (record them, grab from Atoll upstream, or supply Isle-branded ones), drop them back into `DynamicIsland/BluetoothHUDAnimations/` with the same filenames, and commit them as regular binaries (no LFS) — they are small enough.
 
 ## 9. Useful one-liners
 
@@ -321,6 +324,9 @@ xcrun notarytool log <submission-id> --keychain-profile ISLE_NOTARY
 | Version | What landed |
 |---|---|
 | 1.0.0 | Initial public release. All 10 coding agents recognised, hook install for 6 (Claude+forks, Codex, Cursor, Gemini, Kimi, OpenCode), Podcasts media controller, full attention UX (sound + expiry bar + history), Welcome onboarding step, signed + notarized DMG, Sparkle disabled. |
+| 1.1.0 | Weather notch tab (Open-Meteo + wttr.in, shares lock-screen widget defaults), messaging-app monitor (WhatsApp / Teams / Slack / iMessage / Discord via Dock badge AX read), notification-text-behind-physical-notch fix on multi-display setups. |
+| 1.1.1 | WhatsApp Dock title matching: strip invisible Unicode bidi marks (`U+200E` LRM etc.) in `DockBadgeReader` because WhatsApp's `CFBundleDisplayName` is `‎WhatsApp`. Discord noise fix: per-app `acceptsNonNumericBadge` (Discord = `false`) so the gray "any server unread" dot no longer fires a notif — only the numeric badge (DMs / @mentions) does. |
+| 1.1.2 | Discord Canary / PTB / Development variants supported (`dockTitle: String` → `dockTitles: [String]` in `MessagingApp`). Teams "work or school" variant. Empty states for Messages + Agents tabs made visible (was `.tertiary` ≈ invisible on dark notch). Stale permission-request fix: PostToolUse / PostToolUseFailure of Claude / Codex / OpenCode now emit `actionableStateResolved` before `activityUpdated`, so a card no longer sticks around after the user answered in the terminal TUI. Debug "Raw Dock badges" section added to Settings → Messaging for future per-app tuning. |
 
 Future versions should append rows here.
 

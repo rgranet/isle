@@ -26,6 +26,7 @@ struct MessagingSettings: View {
                 appearanceSection
                 appsSection
                 statusSection
+                rawBadgesSection
                 accessibilitySection
             }
         }
@@ -83,6 +84,37 @@ struct MessagingSettings: View {
             Text("Apps")
         } footer: {
             Text("Each app is independently togglable. Disabled apps don't appear in the Messages tab and don't contribute to the closed-notch indicator.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var rawBadgesSection: some View {
+        Section {
+            let snapshot = DockBadgeReader.rawSnapshot()
+            if snapshot.isEmpty {
+                Text("No app currently shows a Dock badge.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(snapshot.keys.sorted(), id: \.self) { title in
+                        HStack {
+                            Text(title)
+                                .font(.system(size: 11, weight: .medium))
+                            Spacer()
+                            Text(snapshot[title] ?? "")
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                        }
+                    }
+                }
+            }
+        } header: {
+            Text("Raw Dock badges (debug)")
+        } footer: {
+            Text("Lists every app currently showing a Dock badge with the raw text Isle reads from macOS. Useful for tuning per-app filters (e.g. understanding what Discord posts for a DM vs an unread server channel).")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
