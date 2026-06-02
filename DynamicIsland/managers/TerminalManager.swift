@@ -41,15 +41,45 @@ import Defaults
 /// (recorded during the transient removal) but the child kept its previous
 /// large frame.
 final class StableTerminalContainerView: NSView {
+    /// Identifies the gutter tint view so `resizeSubviews` can keep its ring mask in sync.
+    static let gutterTintIdentifier = NSUserInterfaceItemIdentifier("terminalGutterTint")
+
     override func resizeSubviews(withOldSize oldSize: NSSize) {
         let size = bounds.size
         // Block degenerate sizes — the terminal would collapse to 2×1
         guard size.width >= 10, size.height >= 10 else { return }
         // Manually fill children to bounds — bypasses autoresizing math
         // that breaks when oldSize was zero but child kept its old frame.
+        // The terminal view gets an inner inset so glyphs don't hug the edge;
+        // the frosted blur underlay and the gutter tint stay full-bleed to the
+        // rounded clip (the tint is masked to the ring so it only fills the inset
+        // gutter, matching the terminal background without doubling over it).
+        let inset = notchTerminalInnerTextInset
+        let terminalFrame = bounds.insetBy(dx: inset, dy: inset)
         for child in subviews {
-            child.frame = bounds
+            if child is LocalProcessTerminalView {
+                child.frame = terminalFrame
+            } else {
+                child.frame = bounds
+                if child.identifier == Self.gutterTintIdentifier {
+                    Self.applyGutterMask(to: child, bounds: bounds, hole: terminalFrame)
+                }
+            }
         }
+    }
+
+    /// Masks `view` to the gutter ring: the full bounds minus the inset `hole`
+    /// where the terminal sits, using the even-odd fill rule.
+    static func applyGutterMask(to view: NSView, bounds: CGRect, hole: CGRect) {
+        let localBounds = CGRect(origin: .zero, size: bounds.size)
+        let mask = (view.layer?.mask as? CAShapeLayer) ?? CAShapeLayer()
+        mask.fillRule = .evenOdd
+        let path = CGMutablePath()
+        path.addRect(localBounds)
+        path.addRect(CGRect(x: hole.minX, y: hole.minY, width: hole.width, height: hole.height))
+        mask.path = path
+        mask.frame = localBounds
+        view.layer?.mask = mask
     }
 
     override func viewDidMoveToWindow() {
@@ -111,6 +141,19 @@ class TerminalManager: ObservableObject {
         return v
     }()
 
+    /// Tinted ring that fills the inset gutter with the terminal's background color
+    /// so the inset text isn't surrounded by a bare-blur "ring".  Sits above the
+    /// blur and below `terminalView`; masked to the gutter so it never doubles the
+    /// translucent background over the terminal's own cells.
+    private lazy var terminalGutterTintView: NSView = {
+        let v = NSView()
+        v.identifier = StableTerminalContainerView.gutterTintIdentifier
+        v.wantsLayer = true
+        v.layer?.backgroundColor = NSColor.clear.cgColor
+        v.autoresizingMask = [.width, .height]
+        return v
+    }()
+
     private init() {}
 
     // MARK: - Lifecycle
@@ -148,14 +191,35 @@ class TerminalManager: ObservableObject {
         if terminalBackgroundEffectView.superview == nil {
             containerView.addSubview(terminalBackgroundEffectView)
         }
+        if terminalGutterTintView.superview == nil {
+            containerView.addSubview(
+                terminalGutterTintView,
+                positioned: .above,
+                relativeTo: terminalBackgroundEffectView
+            )
+        }
+        updateGutterTintColor()
         containerView.addSubview(view)
         terminalView = view
 
-        // If the container already has a valid size, snap the child to it.
+        // If the container already has a valid size, snap the children to it.
+        // Blur + gutter tint fill the full bounds; the terminal is inset so its
+        // glyphs don't hug the edge, and the gutter tint is masked to the ring.
         let containerSize = containerView.bounds.size
         if containerSize.width >= 10, containerSize.height >= 10 {
-            terminalBackgroundEffectView.frame = containerView.bounds
-            view.frame = containerView.bounds
+            let bounds = containerView.bounds
+            let terminalFrame = bounds.insetBy(
+                dx: notchTerminalInnerTextInset,
+                dy: notchTerminalInnerTextInset
+            )
+            terminalBackgroundEffectView.frame = bounds
+            terminalGutterTintView.frame = bounds
+            StableTerminalContainerView.applyGutterMask(
+                to: terminalGutterTintView,
+                bounds: bounds,
+                hole: terminalFrame
+            )
+            view.frame = terminalFrame
         }
 
         // Apply translucency immediately and again on the next run loop tick.
@@ -263,6 +327,13 @@ class TerminalManager: ObservableObject {
     private func refreshTerminalOpacityAndTranslucency(for view: LocalProcessTerminalView) {
         applyTerminalBackgroundAppearance(to: view)
         synchronizeTerminalTranslucencyPresentation(to: view)
+        updateGutterTintColor()
+    }
+
+    /// Keeps the gutter tint ring matching the terminal's resolved (translucent)
+    /// background color so the inset gutter blends seamlessly with the cells.
+    private func updateGutterTintColor() {
+        terminalGutterTintView.layer?.backgroundColor = resolvedTerminalBackgroundNSColor().cgColor
     }
 
     // MARK: - Settings Application
