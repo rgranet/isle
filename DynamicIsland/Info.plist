@@ -18,11 +18,11 @@
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUEnableAutomaticChecks</key>
-	<false/>
+	<true/>
 	<key>SUFeedURL</key>
-	<string>https://updates.withmii.com/isle/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/rgranet/isle/isle-main/Updates/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>q2YQaJ1umGkaIJWMGN9Isj5fx/YlUtxnzHEBqFtfZcg=</string>
+	<string>kD+AunYV1AF+Y56hyraYoYgFBxL5YWGZRskMI6jOM/c=</string>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict/>
