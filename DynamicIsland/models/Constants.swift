@@ -792,7 +792,7 @@ extension Defaults.Keys {
     static let menubarIcon = Key<Bool>("menubarIcon", default: true)
     static let showOnAllDisplays = Key<Bool>("showOnAllDisplays", default: false)
     static let automaticallySwitchDisplay = Key<Bool>("automaticallySwitchDisplay", default: true)
-    static let releaseName = Key<String>("releaseName", default: "Fiji")
+    static let releaseName = Key<String>("releaseName", default: "Lagoon")
     static let hideDynamicIslandFromScreenCapture = Key<Bool>("hideDynamicIslandFromScreenCapture", default: false)
     
         // MARK: Behavior
@@ -1014,7 +1014,12 @@ extension Defaults.Keys {
         // MARK: Fullscreen Media Detection
     static let alwaysHideInFullscreen = Key<Bool>("alwaysHideInFullscreen", default: false)
     
-    static let hideNotchOption = Key<HideNotchOption>("hideNotchOption", default: .nowPlayingOnly)
+    static let hideNotchOption = Key<HideNotchOption>("hideNotchOption", default: .always)
+
+    // Exceptions allowed to bleed through while the notch is hidden in fullscreen.
+    static let fullscreenAllowSneakPeeks = Key<Bool>("fullscreenAllowSneakPeeks", default: true)
+    static let fullscreenAllowMessaging = Key<Bool>("fullscreenAllowMessaging", default: true)
+    static let fullscreenAllowAgentPermissions = Key<Bool>("fullscreenAllowAgentPermissions", default: true)
     
     // MARK: Wobble Animation
     static let enableWobbleAnimation = Key<Bool>("enableWobbleAnimation", default: false)
@@ -1090,6 +1095,10 @@ extension Defaults.Keys {
     /// Briefly grow the notch (like the volume HUD) when an unread message
     /// arrives. Compact indicator stays after the grow collapses.
     static let messagingGrowNotchOnArrival = Key<Bool>("messagingGrowNotchOnArrival", default: true)
+    /// When the first unread arrives (no→some), preselect the Messages tab
+    /// so opening the notch lands there directly. Mirrors the agent-attention
+    /// auto-switch pattern.
+    static let messagingAutoSwitchToTabOnArrival = Key<Bool>("messagingAutoSwitchToTabOnArrival", default: true)
 
     // MARK: Terminal Feature
     static let enableTerminalFeature = Key<Bool>("enableTerminalFeature", default: false)

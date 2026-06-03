@@ -3077,6 +3077,27 @@ struct Media: View {
             .onChange(of: hideNotchOption) {
                 Defaults[.enableFullscreenMediaDetection] = hideNotchOption != .never
             }
+
+            Section {
+                Toggle("Show music / timer / reminder sneak peeks", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowSneakPeeks] },
+                    set: { Defaults[.fullscreenAllowSneakPeeks] = $0 }
+                ))
+                Toggle("Show unread messages indicator", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowMessaging] },
+                    set: { Defaults[.fullscreenAllowMessaging] = $0 }
+                ))
+                Toggle("Show coding-agent permission requests", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowAgentPermissions] },
+                    set: { Defaults[.fullscreenAllowAgentPermissions] = $0 }
+                ))
+            } header: {
+                Text("Exceptions while hidden in fullscreen")
+            } footer: {
+                Text("Transient sneak peeks auto-dismiss. Messaging and agent badges remain until the underlying state clears. On displays without a physical notch, exceptions are still suppressed.")
+            }
+            .disabled(hideNotchOption == .never)
+            .opacity(hideNotchOption == .never ? 0.5 : 1)
         }
         .navigationTitle("Media")
     }
