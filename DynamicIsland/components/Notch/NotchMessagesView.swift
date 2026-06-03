@@ -176,47 +176,51 @@ private struct MessagingAppRow: View {
 
     var body: some View {
         Button(action: onOpen) {
-            HStack(spacing: 10) {
-                appIcon
-                    .frame(width: 30, height: 30)
+            HStack(spacing: 11) {
+                ZStack(alignment: .topTrailing) {
+                    appIcon
+                        .frame(width: 34, height: 34)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(app.displayName)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                    Text("\(unread) unread message\(unread == 1 ? "" : "s")")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer(minLength: 4)
-
-                ZStack {
-                    Capsule(style: .continuous)
-                        .fill(brand)
-                    Text("\(unread)")
-                        .font(.system(size: 10, weight: .bold).monospacedDigit())
+                    Text(unread > 99 ? "99+" : "\(unread)")
+                        .font(.system(size: 9, weight: .bold).monospacedDigit())
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1.5)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(Color.red)
+                        )
+                        .overlay(
+                            Capsule(style: .continuous)
+                                .stroke(Color.black.opacity(0.35), lineWidth: 0.6)
+                        )
+                        .offset(x: 7, y: -5)
+                        .shadow(color: .black.opacity(0.25), radius: 1.5, y: 0.5)
                 }
-                .fixedSize()
-                .frame(height: 18)
+                .frame(width: 34, height: 34)
 
-                Image(systemName: "arrow.up.right.square")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.tertiary)
+                Text(app.displayName)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+
+                Spacer(minLength: 8)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(isHovering ? .secondary : .tertiary)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isHovering ? Color.white.opacity(0.06) : Color.white.opacity(0.03))
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(brand.opacity(isHovering ? 0.18 : 0.09))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(brand.opacity(0.25), lineWidth: 0.6)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(brand.opacity(isHovering ? 0.45 : 0.0), lineWidth: 0.6)
             )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .onHover { hovering in

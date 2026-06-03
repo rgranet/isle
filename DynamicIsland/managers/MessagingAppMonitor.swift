@@ -159,6 +159,14 @@ final class MessagingAppMonitor: ObservableObject {
             if Defaults[.messagingGrowNotchOnArrival] {
                 triggerArrivalExpansionIfNeeded(previous: unreadCounts, current: result)
             }
+            // First unread after empty → preselect Messages tab. Mirrors
+            // AgentSessionStore.handleAttentionTransition: only switch on
+            // the empty→non-empty edge so we don't override the tab the
+            // user manually navigated to during an ongoing conversation.
+            if Defaults[.messagingAutoSwitchToTabOnArrival],
+               unreadCounts.isEmpty, !result.isEmpty {
+                DynamicIslandViewCoordinator.shared.currentView = .messages
+            }
             unreadCounts = result
         }
         lastPolledAt = .now

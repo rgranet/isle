@@ -33,14 +33,13 @@ struct DynamicNotchApp: App {
     let updaterController: SPUStandardUpdaterController
 
     init() {
-        // 1.0 ships without an auto-update server. The Sparkle updater
-        // controller is still constructed so the manual "Check for Updates"
-        // menu item compiles, but `startingUpdater: false` prevents any
-        // network call to the (currently nonexistent) appcast feed.
-        // Flip back to `true` once `updates.withmii.com/isle/appcast.xml`
-        // is hosted (see docs/auto-update-strategy.md).
+        // Sparkle polls the appcast at SUFeedURL (Info.plist) on a cadence
+        // controlled by the user in Settings → General → Auto-update.
+        // Appcast lives in this repo at Updates/appcast.xml served via
+        // raw.githubusercontent.com; DMG assets live on the matching GitHub
+        // Release. See docs/auto-update-strategy.md.
         updaterController = SPUStandardUpdaterController(
-            startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+            startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
         SettingsWindowController.shared.setUpdaterController(updaterController)
     }

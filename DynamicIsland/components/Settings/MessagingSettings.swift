@@ -17,6 +17,7 @@ struct MessagingSettings: View {
     @Default(.enableMessagingApps) private var enabled
     @Default(.messagingPollingInterval) private var pollInterval
     @Default(.messagingShowClosedNotchIndicator) private var showClosedIndicator
+    @Default(.messagingAutoSwitchToTabOnArrival) private var autoSwitchToTab
 
     var body: some View {
         Form {
@@ -72,6 +73,7 @@ struct MessagingSettings: View {
     private var appearanceSection: some View {
         Section("Appearance") {
             Toggle("Show indicator in the closed notch when any app has unread messages", isOn: $showClosedIndicator)
+            Toggle("Jump to the Messages tab when a new unread arrives", isOn: $autoSwitchToTab)
         }
     }
 
