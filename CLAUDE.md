@@ -292,7 +292,7 @@ To add support for, e.g., a new agent called "Foo":
 - **macOS system UNUserNotification** as fallback when Isle isn't running on the active display — not implemented.
 - **Multi-session attention** works but the closed-notch badge only shows the first attention session. Pulse logic could be smarter for >1.
 - **Sparkle hosting** — feed URL `https://updates.withmii.com/isle/appcast.xml` is a placeholder. v1.0 ships with auto-update disabled.
-- **Bluetooth HUD animations missing** — when pushing the initial commit to `github.com/rgranet/isle`, all Git LFS files were dropped (they were never resolved locally, just pointer stubs from the shallow Atoll clone). The repo no longer ships the AirPods/Beats 3D `.mov` animations in `DynamicIsland/BluetoothHUDAnimations/` (airpods, airpodsGen3/Gen4/Max/Pro/Pro3, beatssolo, beatsstudio) nor `DynamicIslandSamples/dynamicislandscreenrecord.gif`. `.gitattributes` was also emptied so no new LFS tracking is active. **TODO**: source replacement assets (record them, grab from Atoll upstream, or supply Isle-branded ones), drop them back into `DynamicIsland/BluetoothHUDAnimations/` with the same filenames, and commit them as regular binaries (no LFS) — they are small enough.
+- **Sample GIF still missing** — `DynamicIslandSamples/dynamicislandscreenrecord.gif` was a Git LFS pointer in Atoll and got dropped with the rest of LFS when the initial Isle snapshot was pushed. Only used in README marketing; no runtime impact. Re-fetch from Atoll upstream (LFS-aware clone) if needed. The 3D Bluetooth HUD `.mov` animations were re-imported in 1.2.2 from Atoll upstream and committed as regular binaries in `DynamicIsland/BluetoothHUDAnimations/`.
 
 ## 9. Useful one-liners
 
