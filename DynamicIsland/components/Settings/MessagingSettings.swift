@@ -75,6 +75,8 @@ struct MessagingSettings: View {
             Toggle("Show indicator in the closed notch when any app has unread messages", isOn: $showClosedIndicator)
             Toggle("Jump to the Messages tab when a new unread arrives", isOn: $autoSwitchToTab)
         }
+        .toggleStyle(.switch)
+        .tint(.accentColor)
     }
 
     private var appsSection: some View {

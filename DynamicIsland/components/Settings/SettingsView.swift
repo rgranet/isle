@@ -1087,6 +1087,7 @@ struct GeneralSettings: View {
     @Default(.reverseScrollGestures) var reverseScrollGestures
     @Default(.externalDisplayStyle) var externalDisplayStyle
     @Default(.hideNonNotchUntilHover) var hideNonNotchUntilHover
+    @Default(.hideNotchOption) var hideNotchOption
 
     private func highlightID(_ title: String) -> String {
         SettingsTab.general.highlightID(for: title)
@@ -1219,6 +1220,45 @@ struct GeneralSettings: View {
             } header: {
                 Text("Notch Height")
             }
+
+            Section {
+                Picker(selection: $hideNotchOption, label: Text("When an app is fullscreen")) {
+                    Text("Hide the notch").tag(HideNotchOption.always)
+                    Text("Hide only when the music app is fullscreen").tag(HideNotchOption.nowPlayingOnly)
+                    Text("Keep visible").tag(HideNotchOption.never)
+                }
+                .onChange(of: hideNotchOption) {
+                    Defaults[.enableFullscreenMediaDetection] = hideNotchOption != .never
+                }
+                .settingsHighlight(id: highlightID("When an app is fullscreen"))
+            } header: {
+                Text("Fullscreen behavior")
+            } footer: {
+                Text("By default Isle hides the notch as soon as any app goes fullscreen so it doesn't intrude on video, slides, or games. Exceptions below let transient notifications still poke through.")
+            }
+
+            Section {
+                Toggle("Show music / timer / reminder sneak peeks", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowSneakPeeks] },
+                    set: { Defaults[.fullscreenAllowSneakPeeks] = $0 }
+                ))
+                Toggle("Show unread messages indicator", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowMessaging] },
+                    set: { Defaults[.fullscreenAllowMessaging] = $0 }
+                ))
+                Toggle("Show coding-agent permission requests", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowAgentPermissions] },
+                    set: { Defaults[.fullscreenAllowAgentPermissions] = $0 }
+                ))
+            } header: {
+                Text("Fullscreen exceptions")
+            } footer: {
+                Text("Transient sneak peeks auto-dismiss. Messaging and agent badges remain until the underlying state clears. On displays without a physical notch, exceptions are still suppressed.")
+            }
+            .toggleStyle(.switch)
+            .tint(.accentColor)
+            .disabled(hideNotchOption == .never)
+            .opacity(hideNotchOption == .never ? 0.5 : 1)
 
             NotchBehaviour()
 
@@ -2767,7 +2807,6 @@ struct Media: View {
     @Default(.waitInterval) var waitInterval
     @Default(.mediaController) var mediaController
     @ObservedObject var coordinator = DynamicIslandViewCoordinator.shared
-    @Default(.hideNotchOption) var hideNotchOption
     @Default(.enableSneakPeek) private var enableSneakPeek
     @Default(.sneakPeekStyles) var sneakPeekStyles
     @Default(.enableMinimalisticUI) var enableMinimalisticUI
@@ -3065,39 +3104,6 @@ struct Media: View {
             .disabled(!showStandardMediaControls)
             .opacity(showStandardMediaControls ? 1 : 0.5)
 
-            Picker(selection: $hideNotchOption, label:
-                    HStack {
-                Text("Hide DynamicIsland Options")
-                customBadge(text: "Beta")
-            }) {
-                Text("Always hide in fullscreen").tag(HideNotchOption.always)
-                Text("Hide only when NowPlaying app is in fullscreen").tag(HideNotchOption.nowPlayingOnly)
-                Text("Never hide").tag(HideNotchOption.never)
-            }
-            .onChange(of: hideNotchOption) {
-                Defaults[.enableFullscreenMediaDetection] = hideNotchOption != .never
-            }
-
-            Section {
-                Toggle("Show music / timer / reminder sneak peeks", isOn: Binding(
-                    get: { Defaults[.fullscreenAllowSneakPeeks] },
-                    set: { Defaults[.fullscreenAllowSneakPeeks] = $0 }
-                ))
-                Toggle("Show unread messages indicator", isOn: Binding(
-                    get: { Defaults[.fullscreenAllowMessaging] },
-                    set: { Defaults[.fullscreenAllowMessaging] = $0 }
-                ))
-                Toggle("Show coding-agent permission requests", isOn: Binding(
-                    get: { Defaults[.fullscreenAllowAgentPermissions] },
-                    set: { Defaults[.fullscreenAllowAgentPermissions] = $0 }
-                ))
-            } header: {
-                Text("Exceptions while hidden in fullscreen")
-            } footer: {
-                Text("Transient sneak peeks auto-dismiss. Messaging and agent badges remain until the underlying state clears. On displays without a physical notch, exceptions are still suppressed.")
-            }
-            .disabled(hideNotchOption == .never)
-            .opacity(hideNotchOption == .never ? 0.5 : 1)
         }
         .navigationTitle("Media")
     }
@@ -3612,38 +3618,22 @@ struct About: View {
                 HStack(spacing: 30) {
                     Spacer(minLength: 0)
                     Button {
-                        NSWorkspace.shared.open(sponsorPage)
-                    } label: {
-                        VStack(spacing: 5) {
-                            Image(systemName: "cup.and.saucer.fill")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
-                            Text("Donate")
-                                .foregroundStyle(.white)
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    Spacer(minLength: 0)
-                    Button {
                         NSWorkspace.shared.open(productPage)
                     } label: {
                         VStack(spacing: 5) {
                             Image("Github")
+                                .renderingMode(.template)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 18)
                             Text("GitHub")
-                                .foregroundStyle(.white)
                         }
+                        .foregroundStyle(.primary)
                         .contentShape(Rectangle())
                     }
                     Spacer(minLength: 0)
                 }
                 .buttonStyle(PlainButtonStyle())
-                Text("Your support funds software development learning for students in 9th–12th grade.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
             }
             VStack(spacing: 0) {
                 Divider()
