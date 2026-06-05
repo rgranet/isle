@@ -602,6 +602,13 @@ private actor LockScreenWeatherProvider {
 
     func fetchSnapshot(location: CLLocation?, source: LockScreenWeatherProviderSource) async throws -> LockScreenWeatherSnapshot {
         switch source {
+        case .appleWeatherKit:
+            // WeatherKit needs a coordinate; without one, fall through to
+            // Open-Meteo (which itself degrades to wttr.in).
+            if let location, let snapshot = try? await fetchAppleWeatherKitSnapshot(location: location) {
+                return snapshot
+            }
+            return try await fetchSnapshot(location: location, source: .openMeteo)
         case .wttr:
             return try await fetchWttrSnapshot(location: location)
         case .openMeteo:
@@ -610,6 +617,50 @@ private actor LockScreenWeatherProvider {
             }
             return try await fetchOpenMeteoSnapshot(location: location)
         }
+    }
+
+    private func fetchAppleWeatherKitSnapshot(location: CLLocation) async throws -> LockScreenWeatherSnapshot {
+        let unit = Defaults[.lockScreenWeatherTemperatureUnit]
+        let forecast = try await AppleWeatherKitService.fetch(
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude,
+            unit: unit
+        )
+
+        let current = forecast.current
+        let temperatureText = "\(Int(round(current.temperature)))°"
+        let temperatureInfo = LockScreenWeatherSnapshot.TemperatureInfo(
+            current: current.temperature,
+            minimum: forecast.daily.first?.minTemp,
+            maximum: forecast.daily.first?.maxTemp,
+            unitSymbol: unit.symbol
+        )
+
+        let today = forecast.daily.first
+        let sunCycle: LockScreenWeatherSnapshot.SunCycleInfo?
+        if today?.sunrise != nil || today?.sunset != nil {
+            sunCycle = LockScreenWeatherSnapshot.SunCycleInfo(sunrise: today?.sunrise, sunset: today?.sunset)
+        } else {
+            sunCycle = nil
+        }
+
+        return LockScreenWeatherSnapshot(
+            temperatureText: temperatureText,
+            symbolName: current.symbolName,
+            description: current.conditionText,
+            locationName: nil,
+            charging: nil,
+            bluetooth: nil,
+            battery: nil,
+            showsLocation: true,
+            airQuality: nil,
+            widgetStyle: .inline,
+            showsChargingPercentage: true,
+            temperatureInfo: temperatureInfo,
+            usesGaugeTint: true,
+            sunCycle: sunCycle,
+            showsSunrise: false
+        )
     }
 
     private func fetchWttrSnapshot(location: CLLocation?) async throws -> LockScreenWeatherSnapshot {

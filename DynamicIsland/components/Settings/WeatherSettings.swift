@@ -49,9 +49,14 @@ struct WeatherSettings: View {
             } header: {
                 Text("Data Source")
             } footer: {
-                Text("Open-Meteo is free and requires no key. wttr.in is a community service. The notch tab currently uses Open-Meteo; this setting also applies to the lock-screen widget.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Apple Weather (WeatherKit) is the default and needs no account. Open-Meteo and wttr.in are free community fallbacks. If Apple Weather is unavailable on this build, Isle automatically falls back to Open-Meteo. This setting is shared with the lock-screen widget.")
+                    if providerSource == .appleWeatherKit {
+                        Text("Weather data provided by  Weather. https://weatherkit.apple.com/legal-attribution.html")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
 
             Section {

@@ -62,6 +62,11 @@ struct CodingAgentAttentionLiveActivity: View {
                 rightSignal(for: session)
                     .frame(width: rightWingWidth, height: notchContentHeight)
             }
+            // Pin to the full notch height and center, exactly like
+            // MusicLiveActivity / TimerLiveActivity. Without this the
+            // activity only claims `notchContentHeight` (= full − 12) and
+            // floats with a black gap instead of filling the notch.
+            .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
             .scaleEffect(puff)
             .onAppear {
                 pulse = true
@@ -97,7 +102,7 @@ struct CodingAgentAttentionLiveActivity: View {
     @ViewBuilder
     private func leftBadge(for session: AgentSession) -> some View {
         let brand = Color(isleHex: session.tool.brandColorHex)
-        let badgeSize = notchContentHeight * 0.78
+        let badgeSize = notchContentHeight * 0.92
         ZStack {
             // Soft brand-color glow that breathes — the visual "I'm not
             // going away until you handle me" cue.
@@ -172,13 +177,13 @@ struct CodingAgentAttentionLiveActivity: View {
                 // as a single coordinated indicator.
                 Circle()
                     .fill(brand)
-                    .frame(width: notchContentHeight * 0.7, height: notchContentHeight * 0.7)
+                    .frame(width: notchContentHeight * 0.82, height: notchContentHeight * 0.82)
                     .blur(radius: 4)
                     .opacity(pulse ? 0.55 : 0.15)
                     .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: pulse)
 
                 Image(systemName: signalSymbol(for: session))
-                    .font(.system(size: notchContentHeight * 0.50, weight: .bold))
+                    .font(.system(size: notchContentHeight * 0.58, weight: .bold))
                     .foregroundStyle(brand)
                     .symbolRenderingMode(.hierarchical)
             }
