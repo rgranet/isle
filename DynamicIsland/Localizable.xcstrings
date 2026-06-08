@@ -24816,6 +24816,16 @@
         }
       }
     },
+    "Fullscreen exceptions": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exceptions en plein écran"
+          }
+        }
+      }
+    },
     "Fully charged": {
       "comment": "Charging fallback label when already charged",
       "localizations": {
@@ -57387,6 +57397,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Météo : %1$@ %2$@ à %3$@"
+          }
+        }
+      }
+    },
+    "Website": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site web"
           }
         }
       }
