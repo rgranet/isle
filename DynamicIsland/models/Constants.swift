@@ -895,7 +895,7 @@ extension Defaults.Keys {
     static let lockScreenWeatherShowsAQI = Key<Bool>("lockScreenWeatherShowsAQI", default: true)
     static let lockScreenWeatherAQIScale = Key<LockScreenWeatherAirQualityScale>("lockScreenWeatherAQIScale", default: .us)
     static let lockScreenWeatherUsesGaugeTint = Key<Bool>("lockScreenWeatherUsesGaugeTint", default: false)
-    static let lockScreenWeatherProviderSource = Key<LockScreenWeatherProviderSource>("lockScreenWeatherProviderSource", default: .openMeteo)
+    static let lockScreenWeatherProviderSource = Key<LockScreenWeatherProviderSource>("lockScreenWeatherProviderSource", default: .appleWeatherKit)
     static let lockScreenWeatherVerticalOffset = Key<Double>("lockScreenWeatherVerticalOffset", default: 0)
     static let lockScreenMusicVerticalOffset = Key<Double>("lockScreenMusicVerticalOffset", default: 0)
     static let lockScreenMusicPanelWidth = Key<Double>("lockScreenMusicPanelWidth", default: 350)

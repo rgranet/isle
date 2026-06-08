@@ -53,7 +53,6 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
     case weather
     case media
     case devices
-    case extensions
     case timer
     case calendar
     case hudAndOSD
@@ -83,7 +82,6 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .clipboard, .screenAssistant, .colorPicker, .shelf,
              .downloads, .shortcuts:                                         return .utilities
         case .stats, .terminal, .codingAgents, .messagingApps:               return .developer
-        case .extensions:                                                    return .integrations
         case .about:                                                         return .info
         }
     }
@@ -97,7 +95,6 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .weather: return String(localized: "Weather")
         case .media: return String(localized: "Media")
         case .devices: return String(localized: "Devices")
-        case .extensions: return String(localized: "Extensions")
         case .timer: return String(localized: "Timer")
         case .calendar: return String(localized: "Calendar")
         case .hudAndOSD: return String(localized: "Controls")
@@ -126,7 +123,6 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .weather: return "cloud.sun.fill"
         case .media: return "play.laptopcomputer"
         case .devices: return "headphones"
-        case .extensions: return "puzzlepiece.extension"
         case .timer: return "timer"
         case .calendar: return "calendar"
         case .hudAndOSD: return "dial.medium.fill"
@@ -155,7 +151,6 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .weather: return Color(red: 0.30, green: 0.70, blue: 0.95)
         case .media: return .green
         case .devices: return Color(red: 0.1, green: 0.11, blue: 0.12)
-        case .extensions: return Color(red: 0.557, green: 0.353, blue: 0.957)
         case .timer: return .red
         case .calendar: return .cyan
         case .hudAndOSD: return .indigo
@@ -474,17 +469,6 @@ struct SettingsView: View {
                         Capsule()
                             .fill(Color.blue)
                     )
-            } else if tab == .extensions {
-                Spacer()
-                Text("BETA")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(Color.blue)
-                    )
             }
         }
         .padding(.vertical, 4)
@@ -522,8 +506,6 @@ struct SettingsView: View {
             .terminal,
             .codingAgents,
             .messagingApps,
-            // Integrations
-            .extensions,
             // Info
             .about
         ]
@@ -727,6 +709,7 @@ struct SettingsView: View {
             SettingsSearchEntry(tab: .general, title: "Open notch on hover", keywords: ["hover to open", "auto open"], highlightID: SettingsTab.general.highlightID(for: "Open notch on hover")),
             SettingsSearchEntry(tab: .general, title: "External display style", keywords: ["dynamic island", "pill", "external display", "non-notch", "floating", "capsule"], highlightID: SettingsTab.general.highlightID(for: "External display style")),
             SettingsSearchEntry(tab: .general, title: "Hide until hovered", keywords: ["hide", "hover", "external", "non-notch", "auto hide", "slide"], highlightID: SettingsTab.general.highlightID(for: "Hide until hovered")),
+            SettingsSearchEntry(tab: .general, title: "Hide in fullscreen", keywords: ["hide", "fullscreen", "full screen", "disappear", "always hide", "media", "dynamic island"], highlightID: SettingsTab.general.highlightID(for: "Hide in fullscreen")),
             SettingsSearchEntry(tab: .general, title: "Notch display height", keywords: ["display height", "menu bar size"], highlightID: SettingsTab.general.highlightID(for: "Notch display height")),
 
             // Live Activities
@@ -879,13 +862,6 @@ struct SettingsView: View {
             // Weather
             SettingsSearchEntry(tab: .weather, title: "Weather", keywords: ["weather", "temperature", "forecast"], highlightID: nil),
 
-            // Extensions
-            SettingsSearchEntry(tab: .extensions, title: "Enable third-party extensions", keywords: ["extensions", "authorization", "third party"], highlightID: SettingsTab.extensions.highlightID(for: "Enable third-party extensions")),
-            SettingsSearchEntry(tab: .extensions, title: "Allow extension live activities", keywords: ["extensions", "live activities", "permissions"], highlightID: SettingsTab.extensions.highlightID(for: "Allow extension live activities")),
-            SettingsSearchEntry(tab: .extensions, title: "Allow extension lock screen widgets", keywords: ["extensions", "lock screen", "widgets"], highlightID: SettingsTab.extensions.highlightID(for: "Allow extension lock screen widgets")),
-            SettingsSearchEntry(tab: .extensions, title: "Enable extension diagnostics logging", keywords: ["extensions", "diagnostics", "logging"], highlightID: SettingsTab.extensions.highlightID(for: "Enable extension diagnostics logging")),
-            SettingsSearchEntry(tab: .extensions, title: "Manage app permissions", keywords: ["extensions", "permissions", "apps"], highlightID: SettingsTab.extensions.highlightID(for: "App permissions list")),
-
             // Shortcuts
             SettingsSearchEntry(tab: .shortcuts, title: "Enable global keyboard shortcuts", keywords: ["keyboard", "shortcut"], highlightID: SettingsTab.shortcuts.highlightID(for: "Enable global keyboard shortcuts")),
 
@@ -986,10 +962,6 @@ struct SettingsView: View {
             SettingsForm(tab: .devices) {
                 DevicesSettingsView()
             }
-        case .extensions:
-            SettingsForm(tab: .extensions) {
-                ExtensionsSettingsView()
-            }
         case .timer:
             SettingsForm(tab: .timer) {
                 TimerSettings()
@@ -1087,6 +1059,7 @@ struct GeneralSettings: View {
     @Default(.reverseScrollGestures) var reverseScrollGestures
     @Default(.externalDisplayStyle) var externalDisplayStyle
     @Default(.hideNonNotchUntilHover) var hideNonNotchUntilHover
+    @Default(.hideNotchOption) var hideNotchOption
 
     private func highlightID(_ title: String) -> String {
         SettingsTab.general.highlightID(for: title)
@@ -1350,6 +1323,18 @@ struct GeneralSettings: View {
             }
             .settingsHighlight(id: highlightID("Hide until hovered"))
             Text("When enabled, the notch slides up and hides on external (non-notch) displays until you hover over it.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Picker("Hide in fullscreen", selection: $hideNotchOption) {
+                Text("Always hide in fullscreen").tag(HideNotchOption.always)
+                Text("Hide only when the playing media app is fullscreen").tag(HideNotchOption.nowPlayingOnly)
+                Text("Never hide").tag(HideNotchOption.never)
+            }
+            .onChange(of: hideNotchOption) {
+                Defaults[.enableFullscreenMediaDetection] = hideNotchOption != .never
+            }
+            .settingsHighlight(id: highlightID("Hide in fullscreen"))
+            Text("Choose when the notch / Dynamic Island disappears while an app is in true fullscreen. Only native fullscreen counts — an ordinary maximized window no longer hides it.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } header: {
@@ -3064,19 +3049,6 @@ struct Media: View {
             }
             .disabled(!showStandardMediaControls)
             .opacity(showStandardMediaControls ? 1 : 0.5)
-
-            Picker(selection: $hideNotchOption, label:
-                    HStack {
-                Text("Hide DynamicIsland Options")
-                customBadge(text: "Beta")
-            }) {
-                Text("Always hide in fullscreen").tag(HideNotchOption.always)
-                Text("Hide only when NowPlaying app is in fullscreen").tag(HideNotchOption.nowPlayingOnly)
-                Text("Never hide").tag(HideNotchOption.never)
-            }
-            .onChange(of: hideNotchOption) {
-                Defaults[.enableFullscreenMediaDetection] = hideNotchOption != .never
-            }
 
             Section {
                 Toggle("Show music / timer / reminder sneak peeks", isOn: Binding(

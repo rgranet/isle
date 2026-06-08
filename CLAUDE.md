@@ -56,6 +56,7 @@ Files I created from scratch live in:
 - `DynamicIsland/components/Onboarding/CodingAgentsOnboardingView.swift`
 - `DynamicIsland/models/PermissionHistoryEntry.swift`
 - `DynamicIsland/extensions/Color+Hex.swift`
+- `DynamicIsland/managers/AppleWeatherKitService.swift`
 - `DynamicIsland/MediaControllers/PodcastsController.swift`
 - `scripts/embed-isle-hooks.sh`
 - `scripts/release.sh`
@@ -244,8 +245,8 @@ Takes 5-15 min. Steps:
 
 ### Prerequisites for release.sh
 - Apple Developer Program (`Developer ID Application` cert in Keychain)
-- Stored notarytool credential: `xcrun notarytool store-credentials ISLE_NOTARY --apple-id … --team-id U4F34B3YF9 --password APP_SPECIFIC_PASSWORD`
-- `scripts/exportOptions.plist` has the right team ID (`U4F34B3YF9`)
+- Stored notarytool credential: `xcrun notarytool store-credentials ISLE_NOTARY --apple-id … --team-id ZP6HAZUACL --password APP_SPECIFIC_PASSWORD`
+- `scripts/exportOptions.plist` has the right team ID (`ZP6HAZUACL`)
 - `Info.plist` `SUPublicEDKey` matches the Sparkle private key in your Keychain
 
 ### Embed Run Script in Xcode
@@ -282,6 +283,7 @@ To add support for, e.g., a new agent called "Foo":
 - **Demo sessions concept is gone.** A simulation feature was added then removed at user's request. Code is clean of `.demo` origin branches now.
 - **Atoll attribution in GPL headers.** A bulk `Atoll → Isle` sed pass overwrote those once; we restored them. If you ever do another bulk rebrand, exclude `* Atoll Contributors`, `* Modified and adapted for Atoll`, etc.
 - **Dock badge title equality is fragile.** macOS Catalyst apps ship `CFBundleDisplayName` prefixed with invisible Unicode bidi marks (e.g. WhatsApp = `‎WhatsApp` with `U+200E`). `DockBadgeReader.strippingBidiMarks()` normalises titles before the dictionary insert. If you add a new app to `MessagingApp.dockTitles` and it "silently fails to match", check the raw title in Settings → Messaging → Raw Dock badges (debug).
+- **WeatherKit needs portal setup, not just the entitlement.** `DynamicIsland.entitlements` carries `com.apple.developer.weatherkit`, but the native `WeatherService` only authenticates when the App ID (`com.withmii.isle` **and** `com.withmii.isle.dev`) has the **WeatherKit** capability enabled in the Apple Developer portal AND the build embeds a provisioning profile that includes it. Since Isle ships Developer-ID (non-App-Store), `release.sh` signing must embed that profile (`--provisioning-profile` / `embedded.provisionprofile`). Until the portal step is done, **even local Debug builds fail to codesign** because automatic signing can't add a capability the App ID doesn't have. The code degrades gracefully at runtime — `AppleWeatherKitService.fetch` throws when unauthenticated and both `NotchWeatherManager` and `LockScreenWeatherManager` fall back to Open-Meteo — but the *build/sign* step is the hard gate. WeatherKit's ToS also require visible "Weather" attribution + legal link; currently surfaced only in Settings → Weather footer (notch/lock-screen attribution UI is a TODO).
 - **`activityUpdated(.running)` preserves pending approval state by design.** SessionState's `preservesActionableState` heuristic refuses to clear `permissionRequest` when a generic `.running` activity event arrives mid-approval. The only way out is `actionableStateResolved` / `sessionCompleted` / a new `permissionRequested`. Every PostToolUse / PostToolUseFailure path in `BridgeServer` MUST emit `actionableStateResolved` before `activityUpdated`, otherwise stale permission cards stick on screen when the user answers in the terminal TUI.
 
 ## 8. Known limitations / deferred work
@@ -326,6 +328,7 @@ xcrun notarytool log <submission-id> --keychain-profile ISLE_NOTARY
 | 1.0.0 | Initial public release. All 10 coding agents recognised, hook install for 6 (Claude+forks, Codex, Cursor, Gemini, Kimi, OpenCode), Podcasts media controller, full attention UX (sound + expiry bar + history), Welcome onboarding step, signed + notarized DMG, Sparkle disabled. |
 | 1.1.0 | Weather notch tab (Open-Meteo + wttr.in, shares lock-screen widget defaults), messaging-app monitor (WhatsApp / Teams / Slack / iMessage / Discord via Dock badge AX read), notification-text-behind-physical-notch fix on multi-display setups. |
 | 1.1.1 | WhatsApp Dock title matching: strip invisible Unicode bidi marks (`U+200E` LRM etc.) in `DockBadgeReader` because WhatsApp's `CFBundleDisplayName` is `‎WhatsApp`. Discord noise fix: per-app `acceptsNonNumericBadge` (Discord = `false`) so the gray "any server unread" dot no longer fires a notif — only the numeric badge (DMs / @mentions) does. |
+| 1.2.0 | Apple Weather (WeatherKit) as the **default** weather provider, with Open-Meteo / wttr.in kept as automatic fallbacks. New `AppleWeatherKitService` wraps native `WeatherService`, maps `WeatherCondition` → WMO codes so it reuses `OpenMeteoSymbolMapper` icons + `NotchWeatherView` tints. Wired into both `NotchWeatherManager` (notch tab) and `LockScreenWeatherManager` (lock-screen widget); both silently fall back to Open-Meteo if WeatherKit is unauthenticated. Added `com.apple.developer.weatherkit` entitlement. **Requires** the WeatherKit capability enabled for `com.withmii.isle`(+`.dev`) in the dev portal + an embedded provisioning profile — see Gotchas. |
 | 1.1.2 | Discord Canary / PTB / Development variants supported (`dockTitle: String` → `dockTitles: [String]` in `MessagingApp`). Teams "work or school" variant. Empty states for Messages + Agents tabs made visible (was `.tertiary` ≈ invisible on dark notch). Stale permission-request fix: PostToolUse / PostToolUseFailure of Claude / Codex / OpenCode now emit `actionableStateResolved` before `activityUpdated`, so a card no longer sticks around after the user answered in the terminal TUI. Debug "Raw Dock badges" section added to Settings → Messaging for future per-app tuning. |
 
 Future versions should append rows here.

@@ -79,7 +79,22 @@ class FullscreenMediaDetector: ObservableObject {
         }
         
 
-        let apps = detector.detectFullscreenApps(debug: false)
+        let apps = detector.detectFullscreenApps(debug: false).filter { info in
+            // MacroVisionKit flags any window that fills the screen's *safe
+            // area* (frame minus insets) within a 2% tolerance. On a non-notch
+            // display that 2% (~25px on a 1440p screen) is larger than the
+            // ~24px menu bar, so an ordinary *maximized* window — whose top
+            // stops just below the menu bar — is misreported as fullscreen and
+            // the pill hides on the plain desktop. A true native-fullscreen
+            // window covers the entire screen frame (the menu-bar strip too);
+            // a maximized window does not. Require a full-frame match to tell
+            // them apart. (Harmless on notch Macs: there the notch screen is
+            // never hidden by this path anyway.)
+            let screenSize = info.screen.frame.size
+            let windowSize = info.windowFrame.size
+            return abs(windowSize.width - screenSize.width) < 2
+                && abs(windowSize.height - screenSize.height) < 2
+        }
         let names = NSScreen.screens.map { $0.localizedName }
         var newStatus: [String: Bool] = [:]
         for name in names {

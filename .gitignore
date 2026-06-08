@@ -122,6 +122,10 @@ integration.json
 #
 .github/instructions/
 .github/assets/
+.agents/
+.claude/
+AGENTS.md
+skills-lock.json
 rough_note.md
 Solid
 SettingsView.swift.md

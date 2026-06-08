@@ -233,6 +233,7 @@ enum LockScreenWeatherWidgetStyle: String, CaseIterable, Defaults.Serializable, 
 }
 
 enum LockScreenWeatherProviderSource: String, CaseIterable, Defaults.Serializable, Identifiable {
+    case appleWeatherKit = "Apple Weather"
     case wttr = "wttr.in"
     case openMeteo = "Open Meteo"
 
@@ -242,7 +243,7 @@ enum LockScreenWeatherProviderSource: String, CaseIterable, Defaults.Serializabl
 
     var supportsAirQuality: Bool {
         switch self {
-        case .wttr:
+        case .wttr, .appleWeatherKit:
             return false
         case .openMeteo:
             return true

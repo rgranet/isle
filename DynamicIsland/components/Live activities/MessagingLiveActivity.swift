@@ -56,6 +56,11 @@ struct MessagingLiveActivity: View {
                 rightCount(total: leading.count, hasOverflow: monitor.unreadCounts.count > 1)
                     .frame(width: rightWingWidth, height: notchContentHeight)
             }
+            // Pin to the full notch height and center, exactly like
+            // MusicLiveActivity / TimerLiveActivity. Without this the
+            // activity only claims `notchContentHeight` (= full − 12) and
+            // floats with a black gap instead of filling the notch.
+            .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
             .scaleEffect(puff)
             .onAppear {
                 pulse = true
@@ -94,7 +99,7 @@ struct MessagingLiveActivity: View {
     @ViewBuilder
     private func leftBadge(for app: MessagingApp) -> some View {
         let brand = Color(isleHex: app.brandColorHex)
-        let badgeSize = notchContentHeight * 0.78
+        let badgeSize = notchContentHeight * 0.92
         ZStack {
             // Soft brand-color glow that breathes — same visual cadence
             // as the coding-agents attention badge so the two surfaces

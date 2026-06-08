@@ -123,6 +123,18 @@ final class NotchWeatherManager: ObservableObject {
         }
 
         do {
+            // Apple Weather (WeatherKit) is the default. When it's selected we
+            // try it first and silently fall back to Open-Meteo if the
+            // entitlement/provisioning profile is unavailable (e.g. an unsigned
+            // local dev build) or the service errors.
+            if Defaults[.lockScreenWeatherProviderSource] == .appleWeatherKit,
+               await applyAppleWeatherKit(location: location) {
+                await updatePlaceName(for: location)
+                lastRefresh = .now
+                state = .ready
+                return
+            }
+
             let payload = try await fetchOpenMeteo(location: location)
             applyPayload(payload)
             await updatePlaceName(for: location)
@@ -132,6 +144,51 @@ final class NotchWeatherManager: ObservableObject {
             // A fresher request superseded us; leave state as the new request set it.
         } catch {
             state = .error(error.localizedDescription)
+        }
+    }
+
+    /// Fetches via WeatherKit and applies the result. Returns `false` (without
+    /// mutating published state) if the service is unavailable, so the caller
+    /// can fall back to Open-Meteo.
+    private func applyAppleWeatherKit(location: CLLocation) async -> Bool {
+        let unit = Defaults[.lockScreenWeatherTemperatureUnit]
+        do {
+            let forecast = try await AppleWeatherKitService.fetch(
+                latitude: location.coordinate.latitude,
+                longitude: location.coordinate.longitude,
+                unit: unit
+            )
+            current = NotchCurrentWeather(
+                temperature: forecast.current.temperature,
+                apparentTemperature: forecast.current.apparentTemperature,
+                weatherCode: forecast.current.weatherCode,
+                isDaytime: forecast.current.isDaytime,
+                windSpeed: forecast.current.windSpeed,
+                humidity: forecast.current.humidity,
+                symbolName: forecast.current.symbolName,
+                conditionText: forecast.current.conditionText
+            )
+            hourly = forecast.hourly.map {
+                NotchHourlyForecast(
+                    id: $0.date,
+                    temperature: $0.temperature,
+                    weatherCode: $0.weatherCode,
+                    isDaytime: $0.isDaytime,
+                    symbolName: $0.symbolName
+                )
+            }
+            daily = forecast.daily.map {
+                NotchDailyForecast(
+                    id: $0.date,
+                    weatherCode: $0.weatherCode,
+                    symbolName: $0.symbolName,
+                    minTemp: $0.minTemp,
+                    maxTemp: $0.maxTemp
+                )
+            }
+            return true
+        } catch {
+            return false
         }
     }
 
