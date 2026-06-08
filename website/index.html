@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Isle - Dynamic Island for your MacBook notch</title>
+  <meta name="description" content="Isle turns the MacBook notch into a Dynamic Island for live activities and AI coding agents like Claude Code, Codex, Cursor, Gemini and OpenCode." />
+  <link rel="canonical" href="https://isle-site-ten.vercel.app/" />
+  <meta name="theme-color" content="#f5f5f7" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Isle" />
+  <meta property="og:title" content="Isle - Dynamic Island for your MacBook notch" />
+  <meta property="og:description" content="A MacBook notch companion for live activities, media, messages and AI coding agents." />
+  <meta property="og:url" content="https://isle-site-ten.vercel.app/" />
+  <meta property="og:image" content="https://isle-site-ten.vercel.app/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Isle - Dynamic Island for your MacBook notch" />
+  <meta name="twitter:description" content="Live activities and AI coding agents, right in the MacBook notch." />
+  <meta name="twitter:image" content="https://isle-site-ten.vercel.app/assets/og.png" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/icon-180.png" />
+  <link rel="preload" href="/assets/styles.css" as="style" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+
+  <!-- Structured data: the product -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Isle",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS 14.0 or later",
+    "description": "Isle turns the MacBook notch into a Dynamic Island and a live control surface for AI coding agents like Claude Code, Codex, Cursor, Gemini CLI and more. The source is GPL v3; supporters get the signed DMG and update emails through Polar.",
+    "url": "https://isle-site-ten.vercel.app/",
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": "9.00",
+      "highPrice": "30.00",
+      "priceCurrency": "USD",
+      "category": "Open-source support"
+    },
+    "publisher": { "@type": "Organization", "name": "withmii" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Is Isle paid software?", "acceptedAnswer": { "@type": "Answer", "text": "The Isle source code is free software under GPL v3. Supporting Isle on Polar helps fund development and gives you the signed, notarized DMG plus update emails." } },
+      { "@type": "Question", "name": "Which AI coding agents does Isle support?", "acceptedAnswer": { "@type": "Answer", "text": "Isle recognises ten agents: Claude Code, Codex, Cursor, Gemini CLI, Kimi, OpenCode, plus the Claude-Code-compatible forks Qoder, Qwen Code, Factory and CodeBuddy. One-click permission approval is available for Claude Code and forks, Codex, Cursor, Gemini and OpenCode." } },
+      { "@type": "Question", "name": "Does Isle send my code or prompts anywhere?", "acceptedAnswer": { "@type": "Answer", "text": "No. Isle runs entirely on your Mac. It talks to your agents over a local Unix socket. No accounts, no telemetry, no servers." } },
+      { "@type": "Question", "name": "Do I need a MacBook with a notch?", "acceptedAnswer": { "@type": "Answer", "text": "A notch gives the best experience, but Isle also works on Macs without one by rendering the island as a floating control surface and menu-bar item." } }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="/">
+        <img class="mark" src="/assets/icon-512.png" alt="Isle app icon" width="30" height="30" />
+        Isle
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="navlink" href="/#features">Features</a>
+        <a class="navlink" href="/#agents">Agents</a>
+        <a class="navlink" href="/#how">How it works</a>
+        <a class="navlink" href="/pricing.html">Support</a>
+        <a class="navlink" href="/vs-agentpeek.html">vs AgentPeek</a>
+        <a class="btn btn-primary" href="/pricing.html">Get Isle</a>
+      </nav>
+      <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="apple-page">
+    <section class="apple-hero" id="top">
+      <div class="wrap apple-hero-copy">
+        <p class="hero-kicker">Isle for macOS</p>
+        <h1>Dynamic Island for your MacBook.</h1>
+        <p class="hero-sub">Live activities and AI coding agents, right in the notch.</p>
+        <div class="apple-actions" id="get">
+          <a class="btn btn-primary btn-lg" href="/pricing.html">Get Isle</a>
+        </div>
+      </div>
+      <div class="wrap hero-product" aria-label="Isle shown inside a MacBook notch">
+        <div class="product-shell">
+          <div class="product-notch" aria-hidden="true"></div>
+          <video autoplay loop muted playsinline poster="/assets/shots/isle-agent-approval-poster.jpg">
+            <source src="/assets/shots/isle-agent-approval.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap apple-intro">
+      <h2>The notch, finally doing something useful.</h2>
+      <p>Isle turns the black camera cutout into a living place for what needs attention now: music, messages, weather, system status and coding agents.</p>
+    </section>
+
+    <section class="wrap apple-feature-grid" id="features">
+      <article class="apple-feature large">
+        <div>
+          <h2>When an agent needs you, Isle opens.</h2>
+          <p>Approve a command, check what changed, then keep working. No terminal babysitting.</p>
+        </div>
+        <img src="/assets/shots/permission.png" alt="Isle showing a Claude Code permission request in the MacBook notch" loading="lazy" />
+      </article>
+      <article class="apple-feature">
+        <h3>A full Dynamic Island.</h3>
+        <p>Media, Podcasts, weather, messages, battery and system HUDs share one calm surface.</p>
+        <img src="/assets/shots/media.png" alt="Isle showing media, weather and message activity in the notch" loading="lazy" />
+      </article>
+      <article class="apple-feature dark">
+        <h3>Private by design.</h3>
+        <p>Runs on your Mac. No account, no telemetry, no cloud relay for your code.</p>
+      </article>
+    </section>
+
+    <section class="wrap apple-agents" id="agents">
+      <h2>Works with the agents you already use.</h2>
+      <p>Claude Code, Codex, Cursor, Gemini CLI, OpenCode, Kimi and compatible forks.</p>
+      <div class="agent-cloud" aria-label="Supported coding agents">
+        <span>Claude Code</span>
+        <span>Codex</span>
+        <span>Cursor</span>
+        <span>Gemini CLI</span>
+        <span>OpenCode</span>
+        <span>Kimi</span>
+        <span>Qoder</span>
+        <span>Qwen Code</span>
+        <span>Factory</span>
+        <span>CodeBuddy</span>
+      </div>
+    </section>
+
+    <section class="wrap apple-split" id="how">
+      <div>
+        <h2>Set up once. Then just work.</h2>
+        <p>Install Isle, choose the agents to watch, and launch your normal terminal sessions. The notch lights up only when something matters.</p>
+      </div>
+      <ol class="setup-list">
+        <li><strong>Install Isle</strong><span>Drag the app into Applications.</span></li>
+        <li><strong>Connect agents</strong><span>Use Settings to install reversible local hooks.</span></li>
+        <li><strong>Stay in flow</strong><span>Approve, deny or jump back when the island asks.</span></li>
+      </ol>
+    </section>
+
+    <section class="wrap apple-gallery" id="screens">
+      <h2>Designed to feel native.</h2>
+      <div class="gallery-grid">
+        <figure>
+          <img src="/assets/shots/agents.png" alt="Isle Agents tab showing multiple AI coding sessions grouped by status" loading="lazy" />
+          <figcaption>All sessions, grouped by status.</figcaption>
+        </figure>
+        <figure>
+          <img src="/assets/shots/settings-wide.png" alt="Isle settings screen for connecting coding agents" loading="lazy" />
+          <figcaption>Agent setup stays explicit and reversible.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="wrap apple-compare">
+      <h2>One app for the notch and the agents.</h2>
+      <div class="compare-cards">
+        <article>
+          <h3>Notch apps</h3>
+          <p>Great for media and widgets. They do not understand your coding agents.</p>
+        </article>
+        <article class="featured">
+          <h3>Isle</h3>
+          <p>Dynamic Island features plus live agent status, approvals and local-first privacy.</p>
+        </article>
+        <article>
+          <h3>Agent monitors</h3>
+          <p>Useful for Claude or Codex. They are not a full MacBook notch companion.</p>
+        </article>
+      </div>
+      <p class="compare-links"><a href="/vs-agentpeek.html">Compare AgentPeek</a><a href="/vs-notchnook.html">Compare NotchNook</a></p>
+    </section>
+
+    <section class="wrap apple-faq" id="faq">
+      <h2>Good to know.</h2>
+      <div class="faq">
+        <details open>
+          <summary>Is Isle paid software?</summary>
+          <p>The source is GPL v3. Supporting Isle pays for the signed, notarized build, updates and development.</p>
+        </details>
+        <details>
+          <summary>Does Isle upload my code?</summary>
+          <p>No. Isle talks to your agents locally on your Mac. There are no accounts and no telemetry.</p>
+        </details>
+        <details>
+          <summary>Do I need a MacBook with a notch?</summary>
+          <p>The notch gives the best experience. Isle can also render as a floating surface on other Macs.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="wrap apple-final">
+      <h2>Make the notch feel intentional.</h2>
+      <div class="apple-actions">
+        <a class="btn btn-primary btn-lg" href="/pricing.html">Get Isle</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a class="brand" href="/" style="margin-bottom:14px;">
+            <img class="mark" src="/assets/icon-512.png" alt="Isle app icon" width="30" height="30" /> Isle
+          </a>
+          <p style="font-size:.92rem;max-width:34ch;">Live activities. Live agents. One isle. The MacBook notch, reimagined for people who run AI coding agents.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="/#features">Features</a>
+          <a href="/#agents">Supported agents</a>
+          <a href="/#how">How it works</a>
+          <a href="/pricing.html">Support</a>
+          <a href="https://github.com/rgranet/isle" rel="noopener">GitHub</a>
+        </div>
+        <div class="footer-col">
+          <h4>Compare</h4>
+          <a href="/vs-agentpeek.html">vs AgentPeek</a>
+          <a href="/vs-notchnook.html">vs NotchNook</a>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms &amp; License</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> withmii. Isle is GPL v3, built on Atoll and open-vibe-island.</span>
+        <span>Made for macOS 14+</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/main.js" defer></script>
+</body>
+</html>
