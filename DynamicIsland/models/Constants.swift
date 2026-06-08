@@ -985,7 +985,10 @@ extension Defaults.Keys {
     static let enableSafariDownloads = Key<Bool>("enableSafariDownloads", default: true)
     static let selectedDownloadIndicatorStyle = Key<DownloadIndicatorStyle>("selectedDownloadIndicatorStyle", default: DownloadIndicatorStyle.progress)
     static let selectedDownloadIconStyle = Key<DownloadIconStyle>("selectedDownloadIconStyle", default: DownloadIconStyle.onlyAppIcon)
-    
+
+        // MARK: Printing
+    static let enablePrintListener = Key<Bool>("enablePrintListener", default: true)
+
         // MARK: HUD
     static let inlineHUD = Key<Bool>("inlineHUD", default: true)
     static let progressBarStyle = Key<ProgressBarStyle>("progressBarStyle", default: .hierarchical)

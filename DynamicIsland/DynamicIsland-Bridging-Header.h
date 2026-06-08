@@ -14,5 +14,6 @@
 #define DynamicIsland_Bridging_Header_h
 
 #import "audio/AudioBridge.h"
+#import "printing/IslePrintQueueReader.h"
 
 #endif /* DynamicIsland_Bridging_Header_h */
