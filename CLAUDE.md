@@ -245,8 +245,8 @@ Takes 5-15 min. Steps:
 
 ### Prerequisites for release.sh
 - Apple Developer Program (`Developer ID Application` cert in Keychain)
-- Stored notarytool credential: `xcrun notarytool store-credentials ISLE_NOTARY --apple-id … --team-id ZP6HAZUACL --password APP_SPECIFIC_PASSWORD`
-- `scripts/exportOptions.plist` has the right team ID (`ZP6HAZUACL`)
+- Stored notarytool credential: `xcrun notarytool store-credentials ISLE_NOTARY --apple-id … --team-id U4F34B3YF9 --password APP_SPECIFIC_PASSWORD`
+- `scripts/exportOptions.plist` has the right team ID (`U4F34B3YF9`)
 - `Info.plist` `SUPublicEDKey` matches the Sparkle private key in your Keychain
 
 ### Embed Run Script in Xcode
