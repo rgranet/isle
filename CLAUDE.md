@@ -58,6 +58,9 @@ Files I created from scratch live in:
 - `DynamicIsland/extensions/Color+Hex.swift`
 - `DynamicIsland/managers/AppleWeatherKitService.swift`
 - `DynamicIsland/MediaControllers/PodcastsController.swift`
+- `DynamicIsland/managers/PrintJobManager.swift`
+- `DynamicIsland/components/Printing/PrintLiveActivity.swift`
+- `DynamicIsland/printing/IslePrintQueueReader.h` / `.m` (ObjC ↔ libcups bridge)
 - `scripts/embed-isle-hooks.sh`
 - `scripts/release.sh`
 - `scripts/exportOptions.plist`
@@ -83,7 +86,10 @@ DynamicIslandAI/                     ← project root
 │   │   ├── AgentSessionJumpback.swift       ← Isle: focus terminal
 │   │   ├── AgentPermissionSoundPlayer.swift ← Isle: audio cue
 │   │   ├── AgentPermissionPresenter.swift   ← Isle: floating-window mode (unused; v1 uses inline)
+│   │   ├── PrintJobManager.swift            ← Isle: polls CUPS, drives print live activity
 │   │   └── ScreenRecordingManager.swift     ← upstream + DisplayLink whitelist patch
+│   ├── printing/
+│   │   └── IslePrintQueueReader.h / .m      ← Isle: ObjC ↔ libcups bridge (in bridging header)
 │   ├── MediaControllers/
 │   │   ├── PodcastsController.swift         ← Isle: M8 add
 │   │   └── (AppleMusic/Spotify/Amazon/YouTube/NowPlaying — upstream)
@@ -93,11 +99,14 @@ DynamicIslandAI/                     ← project root
 │   │   │   └── (NotchHomeView, NotchTerminalView, …, upstream)
 │   │   ├── Live activities/
 │   │   │   └── CodingAgentAttentionLiveActivity.swift ← Isle: closed-notch badge
+│   │   ├── Printing/
+│   │   │   └── PrintLiveActivity.swift      ← Isle: closed-notch printer badge ("1 of 1")
 │   │   ├── Settings/
 │   │   │   ├── CodingAgentsSettings.swift   ← Isle: Settings → Coding Agents pane
 │   │   │   └── SettingsView.swift           ← upstream, patched to add the tab case
 │   │   └── Onboarding/
 │   │       └── CodingAgentsOnboardingView.swift ← Isle: onboarding step
+│   ├── DynamicIsland-Bridging-Header.h      ← imports AudioBridge.h + printing/IslePrintQueueReader.h
 │   ├── enums/generic.swift                  ← patched: added `.codingAgents` to NotchViews
 │   ├── models/Constants.swift               ← patched: Defaults keys for the integration
 │   ├── Assets.xcassets/
@@ -285,6 +294,7 @@ To add support for, e.g., a new agent called "Foo":
 - **Dock badge title equality is fragile.** macOS Catalyst apps ship `CFBundleDisplayName` prefixed with invisible Unicode bidi marks (e.g. WhatsApp = `‎WhatsApp` with `U+200E`). `DockBadgeReader.strippingBidiMarks()` normalises titles before the dictionary insert. If you add a new app to `MessagingApp.dockTitles` and it "silently fails to match", check the raw title in Settings → Messaging → Raw Dock badges (debug).
 - **WeatherKit needs portal setup, not just the entitlement.** `DynamicIsland.entitlements` carries `com.apple.developer.weatherkit`, but the native `WeatherService` only authenticates when the App ID (`com.withmii.isle` **and** `com.withmii.isle.dev`) has the **WeatherKit** capability enabled in the Apple Developer portal AND the build embeds a provisioning profile that includes it. Since Isle ships Developer-ID (non-App-Store), `release.sh` signing must embed that profile (`--provisioning-profile` / `embedded.provisionprofile`). Until the portal step is done, **even local Debug builds fail to codesign** because automatic signing can't add a capability the App ID doesn't have. The code degrades gracefully at runtime — `AppleWeatherKitService.fetch` throws when unauthenticated and both `NotchWeatherManager` and `LockScreenWeatherManager` fall back to Open-Meteo — but the *build/sign* step is the hard gate. WeatherKit's ToS also require visible "Weather" attribution + legal link; currently surfaced only in Settings → Weather footer (notch/lock-screen attribution UI is a TODO).
 - **`activityUpdated(.running)` preserves pending approval state by design.** SessionState's `preservesActionableState` heuristic refuses to clear `permissionRequest` when a generic `.running` activity event arrives mid-approval. The only way out is `actionableStateResolved` / `sessionCompleted` / a new `permissionRequested`. Every PostToolUse / PostToolUseFailure path in `BridgeServer` MUST emit `actionableStateResolved` before `activityUpdated`, otherwise stale permission cards stick on screen when the user answers in the terminal TUI.
+- **Print live activity rides libcups via an ObjC bridge.** The notch printer badge (`PrintLiveActivity`, fed by `PrintJobManager` polling every 2 s, gated by `Defaults[.enablePrintListener]`) reads the CUPS queue through `printing/IslePrintQueueReader.{h,m}` — `cupsGetJobs` for active jobs plus a per-job IPP `Get-Job-Attributes` request for `job-media-sheets[-completed]` (falls back to impressions). Swift never imports `<cups/cups.h>`; the ObjC `.m` does, and only Foundation types cross into Swift via the bridging header. **Linking needs `OTHER_LDFLAGS = -lcups`** in the app target (both Debug + Release build settings in the pbxproj) — without it you get undefined `cupsGetJobs`/`ippNewRequest` symbols at link time. CUPS APIs are Apple-"deprecated" but still the only supported queue reader, so the `.m` wraps everything in `#pragma clang diagnostic ignored "-Wdeprecated-declarations"`. The `1 of 1` page label only appears when the driver reports sheet counts; otherwise the badge shows with a spinner. The bridge does blocking IPP calls, so `PrintJobManager` polls off the main queue (`pollQueue`) and hops back to `@MainActor` to publish. App sandbox is OFF, so connecting to the local cupsd socket just works; if it's ever re-enabled, CUPS access will need a sandbox exception.
 
 ## 8. Known limitations / deferred work
 
