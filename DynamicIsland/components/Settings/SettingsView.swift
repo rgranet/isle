@@ -1218,6 +1218,19 @@ struct GeneralSettings: View {
             .disabled(hideNotchOption == .never)
             .opacity(hideNotchOption == .never ? 0.5 : 1)
 
+            Section {
+                Defaults.Toggle(key: .enablePrintListener) {
+                    Text("Show printing activity")
+                }
+                .toggleStyle(.switch)
+                .tint(.accentColor)
+                .settingsHighlight(id: highlightID("Show printing activity"))
+            } header: {
+                Text("Printing")
+            } footer: {
+                Text("Displays a live printer badge with page progress in the closed notch while a document is printing.")
+            }
+
             gestureControls()
         }
         .toolbar {

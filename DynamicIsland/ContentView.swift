@@ -54,6 +54,7 @@ struct ContentView: View {
     @ObservedObject var extensionNotchExperienceManager = ExtensionNotchExperienceManager.shared
     @ObservedObject var localSendService = LocalSendService.shared
     @State private var downloadManager = DownloadManager.shared
+    @State private var printManager = PrintJobManager.shared
     @ObservedObject var shelfState = ShelfStateViewModel.shared
     @ObservedObject var codingAgentsStore = AgentSessionStore.shared
     @ObservedObject var messagingMonitor = MessagingAppMonitor.shared
@@ -939,6 +940,9 @@ struct ContentView: View {
                           RecordingLiveActivity()
                       } else if (!isCurrentScreenExpansionVisible || currentScreenExpansionType == .download) && vm.notchState == .closed && downloadManager.isDownloading && Defaults[.enableDownloadListener] && !vm.hideOnClosed {
                           DownloadLiveActivity()
+                              .transition(.blurReplace.animation(.interactiveSpring(dampingFraction: 1.2)))
+                      } else if !isCurrentScreenExpansionVisible && vm.notchState == .closed && printManager.isPrinting && Defaults[.enablePrintListener] && !vm.hideOnClosed {
+                          PrintLiveActivity()
                               .transition(.blurReplace.animation(.interactiveSpring(dampingFraction: 1.2)))
                       } else if !isCurrentScreenExpansionVisible && vm.notchState == .closed && localSendLiveActivityActive && !vm.hideOnClosed {
                           LocalSendLiveActivity()
