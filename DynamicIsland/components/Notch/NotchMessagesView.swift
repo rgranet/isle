@@ -201,7 +201,7 @@ private struct MessagingAppRow: View {
 
                 Text(app.displayName)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                     .lineLimit(1)
 
                 Spacer(minLength: 8)
