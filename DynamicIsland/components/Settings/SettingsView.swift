@@ -1195,6 +1195,29 @@ struct GeneralSettings: View {
 
             NotchBehaviour()
 
+            Section {
+                Toggle("Show music / timer / reminder sneak peeks", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowSneakPeeks] },
+                    set: { Defaults[.fullscreenAllowSneakPeeks] = $0 }
+                ))
+                Toggle("Show unread messages indicator", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowMessaging] },
+                    set: { Defaults[.fullscreenAllowMessaging] = $0 }
+                ))
+                Toggle("Show coding-agent permission requests", isOn: Binding(
+                    get: { Defaults[.fullscreenAllowAgentPermissions] },
+                    set: { Defaults[.fullscreenAllowAgentPermissions] = $0 }
+                ))
+            } header: {
+                Text("Fullscreen exceptions")
+            } footer: {
+                Text("Transient sneak peeks auto-dismiss. Messaging and agent badges remain until the underlying state clears. On displays without a physical notch, exceptions are still suppressed.")
+            }
+            .toggleStyle(.switch)
+            .tint(.accentColor)
+            .disabled(hideNotchOption == .never)
+            .opacity(hideNotchOption == .never ? 0.5 : 1)
+
             gestureControls()
         }
         .toolbar {
@@ -2752,7 +2775,6 @@ struct Media: View {
     @Default(.waitInterval) var waitInterval
     @Default(.mediaController) var mediaController
     @ObservedObject var coordinator = DynamicIslandViewCoordinator.shared
-    @Default(.hideNotchOption) var hideNotchOption
     @Default(.enableSneakPeek) private var enableSneakPeek
     @Default(.sneakPeekStyles) var sneakPeekStyles
     @Default(.enableMinimalisticUI) var enableMinimalisticUI
@@ -3049,27 +3071,6 @@ struct Media: View {
             }
             .disabled(!showStandardMediaControls)
             .opacity(showStandardMediaControls ? 1 : 0.5)
-
-            Section {
-                Toggle("Show music / timer / reminder sneak peeks", isOn: Binding(
-                    get: { Defaults[.fullscreenAllowSneakPeeks] },
-                    set: { Defaults[.fullscreenAllowSneakPeeks] = $0 }
-                ))
-                Toggle("Show unread messages indicator", isOn: Binding(
-                    get: { Defaults[.fullscreenAllowMessaging] },
-                    set: { Defaults[.fullscreenAllowMessaging] = $0 }
-                ))
-                Toggle("Show coding-agent permission requests", isOn: Binding(
-                    get: { Defaults[.fullscreenAllowAgentPermissions] },
-                    set: { Defaults[.fullscreenAllowAgentPermissions] = $0 }
-                ))
-            } header: {
-                Text("Exceptions while hidden in fullscreen")
-            } footer: {
-                Text("Transient sneak peeks auto-dismiss. Messaging and agent badges remain until the underlying state clears. On displays without a physical notch, exceptions are still suppressed.")
-            }
-            .disabled(hideNotchOption == .never)
-            .opacity(hideNotchOption == .never ? 0.5 : 1)
         }
         .navigationTitle("Media")
     }
@@ -3584,15 +3585,26 @@ struct About: View {
                 HStack(spacing: 30) {
                     Spacer(minLength: 0)
                     Button {
-                        NSWorkspace.shared.open(sponsorPage)
+                        NSWorkspace.shared.open(donatePage)
                     } label: {
                         VStack(spacing: 5) {
-                            Image(systemName: "cup.and.saucer.fill")
+                            Image(systemName: "heart.fill")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.white)
                             Text("Donate")
-                                .foregroundStyle(.white)
                         }
+                        .foregroundStyle(.primary)
+                        .contentShape(Rectangle())
+                    }
+                    Spacer(minLength: 0)
+                    Button {
+                        NSWorkspace.shared.open(websitePage)
+                    } label: {
+                        VStack(spacing: 5) {
+                            Image(systemName: "globe")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("Website")
+                        }
+                        .foregroundStyle(.primary)
                         .contentShape(Rectangle())
                     }
                     Spacer(minLength: 0)
@@ -3601,21 +3613,18 @@ struct About: View {
                     } label: {
                         VStack(spacing: 5) {
                             Image("Github")
+                                .renderingMode(.template)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 18)
                             Text("GitHub")
-                                .foregroundStyle(.white)
                         }
+                        .foregroundStyle(.primary)
                         .contentShape(Rectangle())
                     }
                     Spacer(minLength: 0)
                 }
                 .buttonStyle(PlainButtonStyle())
-                Text("Your support funds software development learning for students in 9th–12th grade.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
             }
             VStack(spacing: 0) {
                 Divider()
