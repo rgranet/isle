@@ -13,6 +13,20 @@
         -->
 
         <item>
+            <title>Isle 1.2.4</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.4</link>
+            <sparkle:version>20</sparkle:version>
+            <sparkle:shortVersionString>1.2.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 08 Jun 2026 13:16:11 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.4/Isle-1.2.4.dmg"
+                length="26509328"
+                type="application/octet-stream"
+                sparkle:edSignature="X1++g/d1G+9ZpOY+lw+rqiwzy9Rl5oRtusQnoj3UYwsKw7xvjUbTGZRv2Pae6laqOm7g2GnpRa96IwFmBTFhDQ==" />
+        </item>
+
+        <item>
             <title>Isle 1.2.3</title>
             <link>https://github.com/rgranet/isle/releases/tag/v1.2.3</link>
             <sparkle:version>19</sparkle:version>
