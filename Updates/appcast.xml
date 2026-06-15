@@ -13,6 +13,45 @@
         -->
 
         <item>
+            <title>Isle 1.2.5</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.5</link>
+            <sparkle:version>21</sparkle:version>
+            <sparkle:shortVersionString>1.2.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: -apple-system, Helvetica, sans-serif; font-size: 13px; line-height: 1.45; color: #1d1d1f; margin: 0; padding: 10px 6px; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin-bottom: 5px; }
+  p { margin: 0 0 6px; }
+  @media (prefers-color-scheme: dark) { body { color: #f5f5f7; } }
+</style>
+</head>
+<body>
+  <h2>Isle 1.2.5</h2>
+    <ul>
+      <li>Calendar: a &quot;more below&quot; chevron now appears on the events/reminders list when items are hidden under the fold, and disappears once you scroll to the bottom.</li>
+      <li>Lyrics: Apple Music tracks now try their embedded lyrics first, with LRCLIB as a fallback; added diagnostics for missing lyrics.</li>
+      <li>Settings: reorganized the sidebar — Messaging Apps moved to Productivity, Stats moved to System.</li>
+      <li>New &quot;Contributors&quot; tab with a thank-you section and a donation option.</li>
+    </ul>
+</body>
+</html>
+            ]]></description>
+            <pubDate>Mon, 15 Jun 2026 09:45:34 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.5/Isle-1.2.5.dmg"
+                length="27574135"
+                type="application/octet-stream"
+                sparkle:edSignature="7vwk0sfKCj4uKsFtC4XwJu465fG8R8CKE5R2VfIfJl+0eVGFxDYS4mEzu1lGrt/kCbtQF+UyXlrOaChNxLwiCA==" />
+        </item>
+
+        <item>
             <title>Isle 1.2.4</title>
             <link>https://github.com/rgranet/isle/releases/tag/v1.2.4</link>
             <sparkle:version>20</sparkle:version>
