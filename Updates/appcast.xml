@@ -51,5 +51,75 @@
                 sparkle:edSignature="7vwk0sfKCj4uKsFtC4XwJu465fG8R8CKE5R2VfIfJl+0eVGFxDYS4mEzu1lGrt/kCbtQF+UyXlrOaChNxLwiCA==" />
         </item>
 
+        <item>
+            <title>Isle 1.2.4</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.4</link>
+            <sparkle:version>20</sparkle:version>
+            <sparkle:shortVersionString>1.2.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 08 Jun 2026 13:16:11 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.4/Isle-1.2.4.dmg"
+                length="26509328"
+                type="application/octet-stream"
+                sparkle:edSignature="X1++g/d1G+9ZpOY+lw+rqiwzy9Rl5oRtusQnoj3UYwsKw7xvjUbTGZRv2Pae6laqOm7g2GnpRa96IwFmBTFhDQ==" />
+        </item>
+
+        <item>
+            <title>Isle 1.2.3</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.3</link>
+            <sparkle:version>19</sparkle:version>
+            <sparkle:shortVersionString>1.2.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 08 Jun 2026 14:05:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.3/Isle-1.2.3.dmg"
+                length="27504413"
+                type="application/octet-stream"
+                sparkle:edSignature="n586SMKSuiu2wDO6VO2ph39UpbE/PNS8z9BpCTokSTUmuZMRlwb5wTY3VYJkw/1IEuwHBt9wCotHfRpZR09NAA==" />
+        </item>
+
+        <item>
+            <title>Isle 1.2.2</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.2</link>
+            <sparkle:version>18</sparkle:version>
+            <sparkle:shortVersionString>1.2.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 04 Jun 2026 10:22:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.2/Isle-1.2.2.dmg"
+                length="30780873"
+                type="application/octet-stream"
+                sparkle:edSignature="wUGH9trZD8xeQXNk/omF78kuaHcAJkrlTFaYfnm61qr+BJOpNComE2dILF0iT1xru+rrhb8PIMwxdcnOf/d6Cg==" />
+        </item>
+
+        <item>
+            <title>Isle 1.2.1</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.1</link>
+            <sparkle:version>17</sparkle:version>
+            <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 04 Jun 2026 08:52:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.1/Isle-1.2.1.dmg"
+                length="27541304"
+                type="application/octet-stream"
+                sparkle:edSignature="+UEjeKGb4AW+/diVbap1j41+9o0IqB3ARbOvn+rdnqXPHx6m9I6fjx0daXkaKoSiU6P9zuiUUPkoCzojaLRhBQ==" />
+        </item>
+
+        <item>
+            <title>Isle 1.2.0</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.2.0</link>
+            <sparkle:version>16</sparkle:version>
+            <sparkle:shortVersionString>1.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Wed, 03 Jun 2026 13:32:44 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.2.0/Isle-1.2.0.dmg"
+                length="27541700"
+                type="application/octet-stream"
+                sparkle:edSignature="VPFTR1hRkm7HmTMpsXUXhwq/DUGfB0GEKVVfLHgCu1tPj/aaTtrwJGtAiYBTsSs7Nx7o9DdHBSxv8DDkzukwCQ==" />
+        </item>
+
     </channel>
 </rss>
