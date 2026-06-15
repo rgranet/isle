@@ -68,6 +68,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
     case terminal
     case codingAgents
     case messagingApps
+    case contributors
     case about
 
     var id: String { rawValue }
@@ -77,12 +78,12 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general, .appearance:                                          return .core
         case .media, .liveActivities, .lockScreen, .devices, .weather:       return .mediaAndDisplay
-        case .hudAndOSD, .battery:                                           return .system
-        case .timer, .calendar, .notes:                                      return .productivity
+        case .hudAndOSD, .battery, .stats:                                   return .system
+        case .timer, .calendar, .notes, .messagingApps:                      return .productivity
         case .clipboard, .screenAssistant, .colorPicker, .shelf,
              .downloads, .shortcuts:                                         return .utilities
-        case .stats, .terminal, .codingAgents, .messagingApps:               return .developer
-        case .about:                                                         return .info
+        case .terminal, .codingAgents:                                       return .developer
+        case .contributors, .about:                                          return .info
         }
     }
 
@@ -110,6 +111,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .terminal: return String(localized: "Terminal")
         case .codingAgents: return String(localized: "Coding Agents")
         case .messagingApps: return String(localized: "Messaging Apps")
+        case .contributors: return String(localized: "Contributors")
         case .about: return String(localized: "About")
         }
     }
@@ -138,6 +140,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .terminal: return "apple.terminal"
         case .codingAgents: return "sparkle"
         case .messagingApps: return "bubble.left.and.bubble.right.fill"
+        case .contributors: return "hands.clap.fill"
         case .about: return "info.circle"
         }
     }
@@ -166,6 +169,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .terminal: return Color(red: 0.2, green: 0.8, blue: 0.4)
         case .codingAgents: return Color(red: 0.85, green: 0.46, blue: 0.26)
         case .messagingApps: return Color(red: 0.15, green: 0.78, blue: 0.35)
+        case .contributors: return Color(red: 0.93, green: 0.33, blue: 0.45)
         case .about: return .secondary
         }
     }
@@ -490,10 +494,12 @@ struct SettingsView: View {
             // System
             .hudAndOSD,
             .battery,
+            .stats,
             // Productivity
             .timer,
             .calendar,
             .notes,
+            .messagingApps,
             // Utilities
             .clipboard,
             .screenAssistant,
@@ -502,11 +508,10 @@ struct SettingsView: View {
             .downloads,
             .shortcuts,
             // Developer
-            .stats,
             .terminal,
             .codingAgents,
-            .messagingApps,
             // Info
+            .contributors,
             .about
         ]
 
@@ -1021,6 +1026,10 @@ struct SettingsView: View {
         case .messagingApps:
             SettingsForm(tab: .messagingApps) {
                 MessagingSettings()
+            }
+        case .contributors:
+            SettingsForm(tab: .contributors) {
+                ContributorsView()
             }
         case .about:
             if let controller = updaterController {
@@ -3659,6 +3668,96 @@ struct About: View {
             CheckForUpdatesView(updater: updaterController.updater)
         }
         .navigationTitle("About")
+    }
+}
+
+struct Contributor: Identifiable {
+    let id = UUID()
+    let name: String
+    let role: String?
+}
+
+struct ContributorsView: View {
+    private static let accent = Color(red: 0.93, green: 0.33, blue: 0.45)
+
+    private let contributors: [Contributor] = [
+        Contributor(
+            name: "MrS1n3D",
+            role: String(localized: "First contributor")
+        )
+    ]
+
+    var body: some View {
+        Form {
+            Section {
+                VStack(spacing: 8) {
+                    Image(systemName: "hands.clap.fill")
+                        .font(.system(size: 34))
+                        .foregroundStyle(Self.accent)
+                    Text("Thank you")
+                        .font(.title2.weight(.semibold))
+                    Text("Isle is built on open source and made better by its community. Huge thanks to everyone who contributes code, ideas, and feedback.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+            }
+
+            Section {
+                ForEach(contributors) { contributor in
+                    contributorRow(contributor)
+                }
+            } header: {
+                Text("Contributors")
+            }
+
+            Section {
+                Button {
+                    NSWorkspace.shared.open(donatePage)
+                } label: {
+                    Label("Make a donation", systemImage: "heart.fill")
+                }
+                Button {
+                    NSWorkspace.shared.open(productPage)
+                } label: {
+                    Label("Contribute on GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+            } header: {
+                Text("Support Isle")
+            } footer: {
+                Text("Donations are optional and help keep Isle independent. Want to be listed here? Open a pull request on GitHub.")
+            }
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Contributors")
+    }
+
+    @ViewBuilder
+    private func contributorRow(_ contributor: Contributor) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Self.accent.opacity(0.18))
+                    .frame(width: 32, height: 32)
+                Image(systemName: "person.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Self.accent)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(contributor.name)
+                    .fontWeight(.medium)
+                if let role = contributor.role {
+                    Text(role)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+        }
+        .padding(.vertical, 2)
     }
 }
 

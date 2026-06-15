@@ -58907,6 +58907,86 @@
           }
         }
       }
+    },
+    "Contributors": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contributeurs"
+          }
+        }
+      }
+    },
+    "Thank you": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merci"
+          }
+        }
+      }
+    },
+    "Isle is built on open source and made better by its community. Huge thanks to everyone who contributes code, ideas, and feedback.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isle repose sur l’open source et s’améliore grâce à sa communauté. Un grand merci à toutes celles et ceux qui contribuent par leur code, leurs idées et leurs retours."
+          }
+        }
+      }
+    },
+    "First contributor": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Premier contributeur"
+          }
+        }
+      }
+    },
+    "Make a donation": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faire un don"
+          }
+        }
+      }
+    },
+    "Contribute on GitHub": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contribuer sur GitHub"
+          }
+        }
+      }
+    },
+    "Support Isle": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soutenir Isle"
+          }
+        }
+      }
+    },
+    "Donations are optional and help keep Isle independent. Want to be listed here? Open a pull request on GitHub.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les dons sont facultatifs et aident à préserver l’indépendance d’Isle. Vous souhaitez figurer ici ? Ouvrez une pull request sur GitHub."
+          }
+        }
+      }
     }
   },
   "version": "1.2"
