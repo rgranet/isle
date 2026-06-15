@@ -223,11 +223,18 @@ The Unix socket still lives at `~/Library/Application Support/openisland/bridge.
 ### Synchronized Xcode groups
 Atoll uses `PBXFileSystemSynchronizedRootGroup`. New `.swift` files dropped into `DynamicIsland/managers/` or `DynamicIsland/components/...` are auto-picked-up by the build. No pbxproj editing needed for source additions.
 
-### Sparkle disabled for v1
-- `Info.plist` has `SUEnableAutomaticChecks = false`
-- `SPUStandardUpdaterController(startingUpdater: false, …)` in `DynamicIslandApp.init()`
-- Feed URL placeholder `https://updates.withmii.com/isle/appcast.xml` — not hosted
-- To re-enable: flip both to `true` once the host is set up. See `docs/auto-update-strategy.md`.
+### Sparkle enabled (auto-update live)
+- `Info.plist` has `SUEnableAutomaticChecks = true`, a real `SUPublicEDKey`, and
+  `SUFeedURL = https://raw.githubusercontent.com/rgranet/isle/isle-main/Updates/appcast.xml`.
+- `SPUStandardUpdaterController(startingUpdater: true, …)` in `DynamicIslandApp.init()`.
+- **The production feed is the `isle-main` branch**, NOT `main` — `SUFeedURL` points
+  at `isle-main`'s `Updates/appcast.xml` via GitHub raw. DMGs are hosted as GitHub
+  Release assets (`v<version>` tag); the appcast enclosure URLs point there and are
+  EdDSA-signed by `release.sh` (`sign_update`, must match `SUPublicEDKey`).
+- **Deploying an update = adding the generated `<item>` to `isle-main`'s appcast**
+  (newest-first), then pushing `isle-main`. raw.githubusercontent caches ~5 min.
+  `main` keeps a mirror copy of the appcast for reference, but installs never read it.
+- See `docs/auto-update-strategy.md`.
 
 ### DisplayLink false positive (recording indicator)
 `ScreenRecordingManager` was producing a permanent red recording indicator because `CGSIsScreenWatcherPresent()` returns true whenever DisplayLink Manager is running (legitimately driving an external monitor). Patched: a `knownBenignScreenWatchers` set is checked first; if DisplayLink / Duet / Synergy / spacedesk / Luna Display is running, the indicator is suppressed. Trade-off: real screen recordings won't be flagged while one of those apps runs.
@@ -265,8 +272,9 @@ Takes 5-15 min. Steps:
   rename it to the version number before running `release.sh`.
 - `release.sh` does the extraction + HTML rendering + `<description>` injection
   automatically (see the "Release notes" block near the top of the script).
-- Visible to users only once Sparkle is re-enabled (currently disabled, see
-  below). Full details: `docs/auto-update-strategy.md` → "Release notes".
+- Shown to users in Sparkle's "Update Available" dialog (auto-update is live —
+  see "Sparkle enabled" above). Full details: `docs/auto-update-strategy.md` →
+  "Release notes".
 
 ### Prerequisites for release.sh
 - Apple Developer Program (`Developer ID Application` cert in Keychain)
@@ -319,7 +327,7 @@ To add support for, e.g., a new agent called "Foo":
 - **OpenCode plugin** (`opencode-plugin.js` in bundle) still references the old `OPEN_ISLAND_SOCKET_PATH` env var — works because BridgeServer also still listens on that path. Rebrand together when the socket location is migrated.
 - **macOS system UNUserNotification** as fallback when Isle isn't running on the active display — not implemented.
 - **Multi-session attention** works but the closed-notch badge only shows the first attention session. Pulse logic could be smarter for >1.
-- **Sparkle hosting** — feed URL `https://updates.withmii.com/isle/appcast.xml` is a placeholder. v1.0 ships with auto-update disabled.
+- **Sparkle hosting** — auto-update is live: `SUFeedURL` points at `isle-main`'s `Updates/appcast.xml` via GitHub raw, DMGs hosted on GitHub Releases. The old `https://updates.withmii.com/isle/appcast.xml` is no longer used. (Note: the `<channel><link>` inside the appcast still reads the withmii URL cosmetically — harmless.)
 - **Bluetooth HUD animations missing** — when pushing the initial commit to `github.com/rgranet/isle`, all Git LFS files were dropped (they were never resolved locally, just pointer stubs from the shallow Atoll clone). The repo no longer ships the AirPods/Beats 3D `.mov` animations in `DynamicIsland/BluetoothHUDAnimations/` (airpods, airpodsGen3/Gen4/Max/Pro/Pro3, beatssolo, beatsstudio) nor `DynamicIslandSamples/dynamicislandscreenrecord.gif`. `.gitattributes` was also emptied so no new LFS tracking is active. **TODO**: source replacement assets (record them, grab from Atoll upstream, or supply Isle-branded ones), drop them back into `DynamicIsland/BluetoothHUDAnimations/` with the same filenames, and commit them as regular binaries (no LFS) — they are small enough.
 
 ## 9. Useful one-liners
