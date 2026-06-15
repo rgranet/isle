@@ -568,11 +568,47 @@ private extension Date {
     }
 }
 
+// MARK: - Scroll overflow indicator
+
+/// Small downward chevron shown at the bottom of an event list when more
+/// content is scrollable below the fold. Mirrors the reminders-side hint so
+/// users know there are appointments/reminders they haven't scrolled to yet.
+private struct MoreBelowChevron: View {
+    @State private var bounce = false
+
+    var body: some View {
+        Image(systemName: "chevron.down")
+            .font(.system(size: 12, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(7)
+            .background(
+                Circle()
+                    .fill(.regularMaterial)
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.3), lineWidth: 0.5))
+            )
+            .shadow(color: .black.opacity(0.5), radius: 5, y: 1)
+            .offset(y: bounce ? 2 : -2)
+            .padding(.bottom, 5)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.85).repeatForever(autoreverses: true)) {
+                    bounce = true
+                }
+            }
+    }
+}
+
 private struct StandaloneEventCardList: View {
     @Environment(\.openURL) private var openURL
     let events: [EventModel]
     let showFullEventTitles: Bool
     let onToggleReminder: (String, Bool) -> Void
+
+    @State private var bottomReached = false
+    @State private var didSettle = false
+
+    private var hasMoreBelow: Bool {
+        didSettle && !events.isEmpty && !bottomReached
+    }
 
     var body: some View {
         ZStack {
@@ -581,6 +617,14 @@ private struct StandaloneEventCardList: View {
                     ForEach(events) { event in
                         eventCard(event)
                     }
+                    // Invisible bottom sentinel: only "appears" once the user has
+                    // actually scrolled to the end, so the chevron stays visible
+                    // while any content (even a partially-clipped last card) is
+                    // still below the fold.
+                    Color.clear
+                        .frame(height: 1)
+                        .onAppear { bottomReached = true }
+                        .onDisappear { bottomReached = false }
                 }
                 .padding(.vertical, 2)
             }
@@ -595,8 +639,20 @@ private struct StandaloneEventCardList: View {
                 .frame(height: 16)
                 .allowsHitTesting(false)
                 .frame(maxHeight: .infinity, alignment: .bottom)
+
+            if hasMoreBelow {
+                MoreBelowChevron()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
         }
         .clipped()
+        .animation(.easeInOut(duration: 0.2), value: hasMoreBelow)
+        .task {
+            try? await Task.sleep(nanoseconds: 150_000_000)
+            didSettle = true
+        }
     }
 
     @ViewBuilder
@@ -735,6 +791,13 @@ struct EventListView: View {
     @Default(.hideCompletedReminders) private var hideCompletedReminders
     @Default(.hideAllDayEvents) private var hideAllDayEvents
 
+    @State private var bottomReached = false
+    @State private var didSettle = false
+
+    private var hasMoreBelow: Bool {
+        didSettle && !filteredEvents.isEmpty && !bottomReached
+    }
+
     static func filteredEvents(
         events: [EventModel],
         hideCompletedReminders: Bool,
@@ -779,45 +842,60 @@ struct EventListView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ZStack {
-                List {
-                    ForEach(filteredEvents) { event in
-                        Button(action: {
-                            if let url = event.calendarAppURL() {
-                                openURL(url)
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(Array(filteredEvents.enumerated()), id: \.element.id) { index, event in
+                            Button(action: {
+                                if let url = event.calendarAppURL() {
+                                    openURL(url)
+                                }
+                            }) {
+                                eventRow(event)
                             }
-                        }) {
-                            eventRow(event)
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.vertical, 4)
+                            .id(event.id)
+
+                            if index < filteredEvents.count - 1 {
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 0.5)
+                            }
                         }
-                        .id(event.id)
-                        .padding(.leading, -5)
-                        .buttonStyle(PlainButtonStyle())
-                        .listRowSeparator(.automatic)
-                        .listRowSeparatorTint(.gray.opacity(0.2))
-                        .listRowBackground(Color.clear)
+                        // Bottom sentinel — see StandaloneEventCardList.
+                        Color.clear
+                            .frame(height: 1)
+                            .onAppear { bottomReached = true }
+                            .onDisappear { bottomReached = false }
                     }
                 }
-                .listStyle(.plain)
                 .scrollIndicators(.never)
-                .scrollContentBackground(.hidden)
-                .background(Color.clear)
 
                 LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
                     .frame(height: 16)
                     .allowsHitTesting(false)
-                    .alignmentGuide(.top) { d in d[.top] }
                     .frame(maxHeight: .infinity, alignment: .top)
 
                 LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
                     .frame(height: 16)
                     .allowsHitTesting(false)
-                    .alignmentGuide(.bottom) { d in d[.bottom] }
                     .frame(maxHeight: .infinity, alignment: .bottom)
+
+                if hasMoreBelow {
+                    MoreBelowChevron()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .allowsHitTesting(false)
+                        .transition(.opacity)
+                }
             }
-            .onAppear {
-                scrollToRelevantEvent(proxy: proxy)
-            }
+            .animation(.easeInOut(duration: 0.2), value: hasMoreBelow)
+            .onAppear { scrollToRelevantEvent(proxy: proxy) }
             .onChange(of: filteredEvents) { _, _ in
                 scrollToRelevantEvent(proxy: proxy)
+            }
+            .task {
+                try? await Task.sleep(nanoseconds: 150_000_000)
+                didSettle = true
             }
         }
         Spacer(minLength: 0)

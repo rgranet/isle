@@ -1338,15 +1338,17 @@ class MusicManager: ObservableObject {
         let requestArtist = lookup.requestArtist
         let requestTitle = lookup.requestTitle
         let requestAlbum = lookup.requestAlbum
+        let requestBundleID = bundleIdentifier
 
         lyricsFetchTask = Task { [weak self] in
             guard let self else { return }
 
             do {
-                let lyrics = try await self.fetchLyricsFromAPI(
+                let lyrics = try await self.fetchLyricsResolving(
                     artist: requestArtist,
                     title: requestTitle,
-                    album: requestAlbum
+                    album: requestAlbum,
+                    bundleIdentifier: requestBundleID
                 )
                 guard !Task.isCancelled else { return }
 
@@ -1372,8 +1374,63 @@ class MusicManager: ObservableObject {
         }
     }
 
+    /// Resolves lyrics for the current track, preferring lyrics embedded in
+    /// the Apple Music track itself (instant, offline) and falling back to the
+    /// LRCLIB community database. Apple does not expose the synced lyrics its
+    /// Music app displays, so the embedded property only yields anything for
+    /// library tracks that carry their own lyrics — LRCLIB covers the rest.
+    private func fetchLyricsResolving(
+        artist: String,
+        title: String,
+        album: String,
+        bundleIdentifier: String?
+    ) async throws -> [LyricLine] {
+        if bundleIdentifier == "com.apple.Music" {
+            let embedded = await fetchAppleMusicEmbeddedLyrics()
+            if !embedded.isEmpty {
+                print("[Lyrics] Using embedded Apple Music lyrics (\(embedded.count) line(s))")
+                return embedded
+            }
+            print("[Lyrics] No embedded Apple Music lyrics for current track; falling back to LRCLIB")
+        }
+        return try await fetchLyricsFromAPI(artist: artist, title: title, album: album)
+    }
+
+    /// Reads `lyrics of current track` from the Music app over AppleScript.
+    /// Returns parsed synced lyrics when the embedded text carries `[mm:ss]`
+    /// timestamps, otherwise a single plain-text line. Empty for streamed
+    /// catalog tracks (Apple doesn't write its synced lyrics into this field).
+    private func fetchAppleMusicEmbeddedLyrics() async -> [LyricLine] {
+        let script = """
+        tell application "Music"
+            try
+                if player state is stopped then return ""
+                return lyrics of current track
+            on error
+                return ""
+            end try
+        end tell
+        """
+
+        do {
+            let descriptor = try await AppleScriptHelper.execute(script)
+            let raw = (descriptor?.stringValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !raw.isEmpty else { return [] }
+
+            let synced = parseLRC(raw)
+            if !synced.isEmpty { return synced }
+            return [LyricLine(timestamp: 0, text: raw)]
+        } catch {
+            print("[Lyrics] Apple Music AppleScript lyrics read failed: \(error)")
+            return []
+        }
+    }
+
     private func fetchLyricsFromAPI(artist: String, title: String, album: String) async throws -> [LyricLine] {
-        guard !artist.isEmpty, !title.isEmpty else { return [] }
+        guard !artist.isEmpty, !title.isEmpty else {
+            print("[Lyrics] LRCLIB skipped — empty artist/title (artist: '\(artist)', title: '\(title)')")
+            return []
+        }
 
         // Normalize input and percent-encode
         let cleanArtist = artist.folding(options: .diacriticInsensitive, locale: .current)
@@ -1386,11 +1443,20 @@ class MusicManager: ObservableObject {
 
         // Use LRCLIB search endpoint which returns an array JSON with `plainLyrics` and/or `syncedLyrics`.
         let urlString = "https://lrclib.net/api/search?track_name=\(encodedTitle)&artist_name=\(encodedArtist)"
-        guard let url = URL(string: urlString) else { return [] }
+        guard let url = URL(string: urlString) else {
+            print("[Lyrics] LRCLIB invalid URL for title: '\(cleanTitle)' artist: '\(cleanArtist)'")
+            return []
+        }
 
+        print("[Lyrics] LRCLIB request → \(urlString)")
         let (data, response) = try await URLSession.shared.data(from: url)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+        print("[Lyrics] LRCLIB response ← HTTP \(statusCode), \(data.count) bytes")
         if let http = response as? HTTPURLResponse, http.statusCode == 200 {
             // Try parse as array JSON (preferred)
+            if let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+                print("[Lyrics] LRCLIB returned \(jsonArray.count) candidate(s)")
+            }
             if let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
                let bestMatch = bestLyricsMatch(in: jsonArray, artist: cleanArtist, title: cleanTitle, album: cleanAlbum) {
                 let first = bestMatch
@@ -1439,6 +1505,13 @@ class MusicManager: ObservableObject {
         let requestArtist = normalizedLyricsRequestComponent(artistName)
         let requestTitle = normalizedLyricsTitle(songTitle)
         let requestAlbum = normalizedLyricsRequestComponent(album)
+
+        // Skip the placeholder "now playing" track so we don't fire a doomed
+        // LRCLIB request (and flash "No lyrics found") when nothing is playing.
+        if Self.placeholderTitles.contains(requestTitle.lowercased())
+            || Self.placeholderArtists.contains(requestArtist.lowercased()) {
+            return nil
+        }
 
         let key = LyricsLookupKey(
             title: requestTitle.lowercased(),

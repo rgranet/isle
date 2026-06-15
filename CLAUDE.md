@@ -139,6 +139,7 @@ DynamicIslandAI/                     ← project root
 │   └── m9-xcode-setup.md            ← one-time Xcode steps
 ├── Updates/appcast.xml              ← Sparkle feed (empty stub for v1)
 ├── NOTICE                           ← GPL lineage attribution
+├── CHANGELOG.md                     ← user-facing release notes; release.sh feeds it to Sparkle's <description>
 ├── README.md / CONTRIBUTING.md
 └── LICENSE                          ← GPL v3
 ```
@@ -242,6 +243,9 @@ Atoll uses `PBXFileSystemSynchronizedRootGroup`. New `.swift` files dropped into
 ./scripts/release.sh 1.0.0
 ```
 Takes 5-15 min. Steps:
+0. **Validates release notes**: extracts the `## <version>` section from
+   `CHANGELOG.md` up front. No section → aborts in seconds (before the long
+   build/notarize), so you never ship an update without a changelog.
 1. `swift build -c release --package-path Packages/IsleCore` (CLIs)
 2. `xcodebuild archive` → signed .app via Developer ID
 3. `xcodebuild -exportArchive` per `scripts/exportOptions.plist`
@@ -250,7 +254,19 @@ Takes 5-15 min. Steps:
 6. `hdiutil create` (DMG) — or `create-dmg` if installed for prettier UI
 7. `notarytool submit --wait` (DMG) — DMG container needs its own ticket
 8. `stapler staple` (DMG)
-9. Generates `Isle-<version>.appcast.xml` stub
+9. Generates `Isle-<version>.appcast.xml` stub — **with release notes baked in**
+   as the item's `<description>` (the changelog Sparkle shows before installing),
+   rendered from `CHANGELOG.md` → HTML (`<ul><li>`, light/dark styling).
+
+### Release notes / changelog
+- **`CHANGELOG.md` (repo root) is the single source of truth** for what users
+  see in Sparkle's "Update Available" dialog. One `## <version>` section per
+  release, `- ` bullets, English. Keep `## Unreleased` at the top while working;
+  rename it to the version number before running `release.sh`.
+- `release.sh` does the extraction + HTML rendering + `<description>` injection
+  automatically (see the "Release notes" block near the top of the script).
+- Visible to users only once Sparkle is re-enabled (currently disabled, see
+  below). Full details: `docs/auto-update-strategy.md` → "Release notes".
 
 ### Prerequisites for release.sh
 - Apple Developer Program (`Developer ID Application` cert in Keychain)
@@ -341,6 +357,8 @@ xcrun notarytool log <submission-id> --keychain-profile ISLE_NOTARY
 | 1.2.0 | Apple Weather (WeatherKit) as the **default** weather provider, with Open-Meteo / wttr.in kept as automatic fallbacks. New `AppleWeatherKitService` wraps native `WeatherService`, maps `WeatherCondition` → WMO codes so it reuses `OpenMeteoSymbolMapper` icons + `NotchWeatherView` tints. Wired into both `NotchWeatherManager` (notch tab) and `LockScreenWeatherManager` (lock-screen widget); both silently fall back to Open-Meteo if WeatherKit is unauthenticated. Added `com.apple.developer.weatherkit` entitlement. **Requires** the WeatherKit capability enabled for `com.withmii.isle`(+`.dev`) in the dev portal + an embedded provisioning profile — see Gotchas. |
 | 1.1.2 | Discord Canary / PTB / Development variants supported (`dockTitle: String` → `dockTitles: [String]` in `MessagingApp`). Teams "work or school" variant. Empty states for Messages + Agents tabs made visible (was `.tertiary` ≈ invisible on dark notch). Stale permission-request fix: PostToolUse / PostToolUseFailure of Claude / Codex / OpenCode now emit `actionableStateResolved` before `activityUpdated`, so a card no longer sticks around after the user answered in the terminal TUI. Debug "Raw Dock badges" section added to Settings → Messaging for future per-app tuning. |
 | 1.2.4 | Settings polish: fullscreen-exception toggles moved Media → General as iOS-style switches, About cleanup (GitHub link → `rgranet/isle` + light-mode-visible template logo, Donate → pricing page, new Website button), messaging toggles as colored switches. New **print live activity**: `IslePrintQueueReader` (ObjC bridge to libcups, `cupsGetJobs` + IPP `Get-Job-Attributes`) feeds `PrintJobManager` (2 s poll) and `PrintLiveActivity` — a closed-notch printer badge with "1 of 1" page progress, gated by `Defaults[.enablePrintListener]` (Settings → General → Printing). Links `libcups` via `OTHER_LDFLAGS = -lcups`. Build 20. |
+
+| 1.2.5 | Calendar: "more below" chevron on the events/reminders list (geometry-based, hidden once scrolled to bottom) in both `StandaloneEventCardList` and the compact `EventListView` (List → ScrollView+LazyVStack). Lyrics: Apple Music tracks now try **embedded** lyrics first via AppleScript (`lyrics of current track`) with LRCLIB fallback (`fetchLyricsResolving`), placeholder track no longer queried, `[Lyrics]` diagnostics added. Settings sidebar reorg: Messaging Apps → Productivity, Stats → System, Developer = Terminal+Coding Agents; new **Contributors** tab (Info group, thanks MrS1n3D) with donate/GitHub links; FR localized. **Release notes pipeline**: `CHANGELOG.md` → `release.sh` injects per-version `<description>` HTML into the appcast so Sparkle shows a changelog before each update. Build 21. |
 
 Future versions should append rows here.
 

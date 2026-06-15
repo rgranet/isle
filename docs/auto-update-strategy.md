@@ -94,7 +94,12 @@ That script (see source for inline comments):
 5. Staples the ticket onto the `.app` so Gatekeeper accepts it offline
 6. Builds a pretty DMG (`create-dmg` if installed, else `hdiutil`)
 7. Signs the DMG with the Sparkle EdDSA private key
-8. Spits out a ready-made appcast `<item>` block at `build/release/<version>/Isle-<version>.appcast.xml`
+8. Spits out a ready-made appcast `<item>` block at `build/release/<version>/Isle-<version>.appcast.xml` — **including the release notes** (the `<description>` Sparkle shows before installing, pulled from `CHANGELOG.md`)
+
+Before all of that, the script also **validates the changelog up front** (see
+[Release notes](#release-notes-the-changelog-shown-before-each-update) below): if
+there is no `## <version>` section in `CHANGELOG.md`, it aborts in seconds rather
+than after the ~10-minute notarization step.
 
 Then **you**:
 
@@ -103,6 +108,42 @@ Then **you**:
 11. Push `Updates/appcast.xml` to the URL set in `SUFeedURL`
 
 That's the full release loop — should take <10 min once setup is done.
+
+## Release notes (the changelog shown before each update)
+
+Sparkle renders an item's `<description>` as the "what's new" panel in its
+**Update Available** dialog, *before* the user installs. Isle wires that to a
+versioned changelog so every update ships with notes.
+
+**Source of truth: `CHANGELOG.md` at the repo root.**
+
+- One `## <version>` heading per release (e.g. `## 1.2.5`), newest on top.
+- `- ` bullets, short, user-facing, English (matches the rest of the UI strings).
+- Keep an `## Unreleased` section at the top while you work; rename it to the
+  version number right before `./scripts/release.sh <version>`.
+
+**How `release.sh` uses it** (all automatic — see the "Release notes" block near
+the top of the script):
+
+1. `awk` extracts the bullet block under `## <VERSION>` from `CHANGELOG.md`.
+2. A small inline `python3` step converts the Markdown bullets to HTML
+   (`<ul><li>`, HTML-escaped text, light/dark styling via
+   `prefers-color-scheme`).
+3. That HTML is embedded into the generated `<item>` as
+   `<description><![CDATA[ … ]]></description>`.
+
+**Hard requirement:** if no `## <VERSION>` section exists, the release aborts
+immediately with a clear error. This guarantees a changelog is shown before
+*every* update — you cannot ship a release without one.
+
+> Note: the `<description>` only becomes visible to users once auto-update is
+> actually enabled (see "Re-enabling" — `SUEnableAutomaticChecks` is `false` for
+> now). The pipeline is in place and tested ahead of that switch.
+
+If you ever want **per-language** release notes, Sparkle supports multiple
+`<description xml:lang="…">` elements per item; that would mean teaching
+`release.sh` to read localized changelog files — not done yet (notes are English
+only).
 
 ## What users see
 
