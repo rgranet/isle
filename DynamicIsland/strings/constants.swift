@@ -19,7 +19,7 @@
 import Foundation
 
 let productPage = URL(string: "https://github.com/rgranet/isle")!
-let websitePage = URL(string: "https://isle-site-ten.vercel.app")!
-let donatePage = URL(string: "https://isle-site-ten.vercel.app/pricing.html#tiers")!
+let websitePage = URL(string: "https://isle.withmii.com")!
+let donatePage = URL(string: "https://isle.withmii.com/pricing.html#tiers")!
 
 
