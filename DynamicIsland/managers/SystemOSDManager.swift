@@ -18,6 +18,7 @@
 
 import Foundation
 import os
+import Darwin
 
 class SystemOSDManager {
     private init() {}
@@ -199,22 +200,35 @@ class SystemOSDManager {
     }
 
     /// Returns the newest OSDUIHelper PID, or nil if none.
+    ///
+    /// Uses libproc (an in-process syscall) rather than spawning `pgrep`.
+    /// The suppression watcher calls this every 150ms, so a fork/exec here
+    /// meant ~7 child processes per second for the whole app lifetime — a
+    /// constant CPU/energy drain. The native scan is orders of magnitude cheaper.
     private static func osduiHelperPID() -> Int32? {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
-        task.arguments = ["-n", "OSDUIHelper"]
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        do {
-            try task.run()
-            task.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let trimmed = String(data: data, encoding: .utf8)?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            return Int32(trimmed)
-        } catch {
-            return nil
+        let maxCount = proc_listallpids(nil, 0)
+        guard maxCount > 0 else { return nil }
+
+        var pids = [pid_t](repeating: 0, count: Int(maxCount) + 16)
+        let byteCount = proc_listallpids(&pids, Int32(pids.count * MemoryLayout<pid_t>.size))
+        guard byteCount > 0 else { return nil }
+
+        let count = Int(byteCount) / MemoryLayout<pid_t>.size
+        var nameBuffer = [CChar](repeating: 0, count: 64)
+        var newest: Int32?
+
+        for index in 0..<count {
+            let pid = pids[index]
+            guard pid > 0 else { continue }
+            let written = nameBuffer.withUnsafeMutableBufferPointer { buffer in
+                proc_name(pid, buffer.baseAddress, UInt32(buffer.count))
+            }
+            guard written > 0, String(cString: nameBuffer) == "OSDUIHelper" else { continue }
+            // `pgrep -n` returned the most-recently-started PID; the highest
+            // PID is a good proxy for the newest incarnation.
+            if newest == nil || pid > newest! { newest = pid }
         }
+        return newest
     }
 
     /// Sends SIGSTOP to all OSDUIHelper processes. Idempotent.

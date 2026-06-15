@@ -22,6 +22,17 @@ public final class ClaudeTranscriptDiscovery: @unchecked Sendable {
     private let maxAge: TimeInterval
     private let maxFiles: Int
 
+    // Cache of parsed sessions keyed by file path, invalidated by modification
+    // date. Transcript JSONL files are large and re-parsing every one on every
+    // poll (every few seconds) is the app's biggest CPU/energy cost — so we only
+    // re-parse files whose mtime changed since we last saw them.
+    private struct CacheEntry {
+        let modifiedAt: Date
+        let session: AgentSession
+    }
+    private let cacheLock = NSLock()
+    private var sessionCache: [String: CacheEntry] = [:]
+
     public init(
         rootURL: URL = ClaudeTranscriptDiscovery.defaultRootURL,
         fileManager: FileManager = .default,
@@ -67,9 +78,33 @@ public final class ClaudeTranscriptDiscovery: @unchecked Sendable {
             .sorted { $0.modifiedAt > $1.modifiedAt }
             .prefix(maxFiles)
 
-        return sortedCandidates.compactMap { candidate in
-            parseSession(at: candidate.fileURL, fallbackUpdatedAt: candidate.modifiedAt)
+        var refreshedCache: [String: CacheEntry] = [:]
+        let sessions: [AgentSession] = sortedCandidates.compactMap { candidate in
+            let key = candidate.fileURL.path
+
+            cacheLock.lock()
+            let cached = sessionCache[key]
+            cacheLock.unlock()
+
+            if let cached, cached.modifiedAt == candidate.modifiedAt {
+                refreshedCache[key] = cached
+                return cached.session
+            }
+
+            guard let session = parseSession(at: candidate.fileURL, fallbackUpdatedAt: candidate.modifiedAt) else {
+                return nil
+            }
+            refreshedCache[key] = CacheEntry(modifiedAt: candidate.modifiedAt, session: session)
+            return session
         }
+
+        // Replace the cache wholesale so entries for files that aged out / were
+        // deleted don't accumulate.
+        cacheLock.lock()
+        sessionCache = refreshedCache
+        cacheLock.unlock()
+
+        return sessions
     }
 
     private func parseSession(at fileURL: URL, fallbackUpdatedAt: Date) -> AgentSession? {

@@ -542,9 +542,9 @@ class MusicManager: ObservableObject {
         Task { @MainActor in
             do {
                 self.isNowPlayingDeprecated = try await self.mediaChecker.checkDeprecationStatus()
-                print("Deprecation check completed: \(self.isNowPlayingDeprecated)")
+                debugPrint("Deprecation check completed: \(self.isNowPlayingDeprecated)")
             } catch {
-                print("Failed to check deprecation status: \(error). Defaulting to false.")
+                debugPrint("Failed to check deprecation status: \(error). Defaulting to false.")
                 self.isNowPlayingDeprecated = false
             }
             
@@ -554,7 +554,7 @@ class MusicManager: ObservableObject {
             }
             
             if pearDesktopRunning {
-                print("[MusicManager] Pear Desktop detected at startup, auto-switching to YouTubeMusicController")
+                debugPrint("[MusicManager] Pear Desktop detected at startup, auto-switching to YouTubeMusicController")
                 self.isPearDesktopAutoSwitched = true
                 if let controller = self.createController(for: .youtubeMusic) {
                     self.setActiveController(controller)
@@ -574,7 +574,7 @@ class MusicManager: ObservableObject {
                       let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
                       app.bundleIdentifier == Self.pearDesktopBundleID else { return }
 
-                print("[MusicManager] Pear Desktop launched, auto-switching to YouTubeMusicController")
+                debugPrint("[MusicManager] Pear Desktop launched, auto-switching to YouTubeMusicController")
                 self.isPearDesktopAutoSwitched = true
                 if let controller = self.createController(for: .youtubeMusic) {
                     self.setActiveController(controller)
@@ -588,7 +588,7 @@ class MusicManager: ObservableObject {
                       let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
                       app.bundleIdentifier == Self.pearDesktopBundleID else { return }
 
-                print("[MusicManager] Pear Desktop terminated, reverting to preferred controller")
+                debugPrint("[MusicManager] Pear Desktop terminated, reverting to preferred controller")
                 if self.isPearDesktopAutoSwitched {
                     self.isPearDesktopAutoSwitched = false
                     self.setActiveControllerBasedOnPreference()
@@ -661,7 +661,7 @@ class MusicManager: ObservableObject {
 
     private func setActiveControllerBasedOnPreference() {
         let preferredType = Defaults[.mediaController]
-        print("Preferred Media Controller: \(preferredType)")
+        debugPrint("Preferred Media Controller: \(preferredType)")
 
         // If NowPlaying is deprecated but that's the preference, use Apple Music instead
         let controllerType = (self.isNowPlayingDeprecated && preferredType == .nowPlaying)
@@ -1243,7 +1243,7 @@ class MusicManager: ObservableObject {
 
     func openMusicApp() {
         guard let bundleID = bundleIdentifier else {
-            print("Error: appBundleIdentifier is nil")
+            debugPrint("Error: appBundleIdentifier is nil")
             return
         }
 
@@ -1252,13 +1252,13 @@ class MusicManager: ObservableObject {
             let configuration = NSWorkspace.OpenConfiguration()
             workspace.openApplication(at: appURL, configuration: configuration) { (app, error) in
                 if let error = error {
-                    print("Failed to launch app with bundle ID: \(bundleID), error: \(error)")
+                    debugPrint("Failed to launch app with bundle ID: \(bundleID), error: \(error)")
                 } else {
-                    print("Launched app with bundle ID: \(bundleID)")
+                    debugPrint("Launched app with bundle ID: \(bundleID)")
                 }
             }
         } else {
-            print("Failed to find app with bundle ID: \(bundleID)")
+            debugPrint("Failed to find app with bundle ID: \(bundleID)")
         }
     }
 
@@ -1360,7 +1360,7 @@ class MusicManager: ObservableObject {
                     self.applyLyricsToDisplay(lyrics)
                 }
             } catch {
-                print("Failed to fetch lyrics: \(error)")
+                debugPrint("Failed to fetch lyrics: \(error)")
                 await MainActor.run {
                     guard self.activeLyricsKey == key else { return }
                     self.lyricsFetchKey = nil
@@ -1388,10 +1388,10 @@ class MusicManager: ObservableObject {
         if bundleIdentifier == "com.apple.Music" {
             let embedded = await fetchAppleMusicEmbeddedLyrics()
             if !embedded.isEmpty {
-                print("[Lyrics] Using embedded Apple Music lyrics (\(embedded.count) line(s))")
+                debugPrint("[Lyrics] Using embedded Apple Music lyrics (\(embedded.count) line(s))")
                 return embedded
             }
-            print("[Lyrics] No embedded Apple Music lyrics for current track; falling back to LRCLIB")
+            debugPrint("[Lyrics] No embedded Apple Music lyrics for current track; falling back to LRCLIB")
         }
         return try await fetchLyricsFromAPI(artist: artist, title: title, album: album)
     }
@@ -1421,14 +1421,14 @@ class MusicManager: ObservableObject {
             if !synced.isEmpty { return synced }
             return [LyricLine(timestamp: 0, text: raw)]
         } catch {
-            print("[Lyrics] Apple Music AppleScript lyrics read failed: \(error)")
+            debugPrint("[Lyrics] Apple Music AppleScript lyrics read failed: \(error)")
             return []
         }
     }
 
     private func fetchLyricsFromAPI(artist: String, title: String, album: String) async throws -> [LyricLine] {
         guard !artist.isEmpty, !title.isEmpty else {
-            print("[Lyrics] LRCLIB skipped — empty artist/title (artist: '\(artist)', title: '\(title)')")
+            debugPrint("[Lyrics] LRCLIB skipped — empty artist/title (artist: '\(artist)', title: '\(title)')")
             return []
         }
 
@@ -1444,18 +1444,18 @@ class MusicManager: ObservableObject {
         // Use LRCLIB search endpoint which returns an array JSON with `plainLyrics` and/or `syncedLyrics`.
         let urlString = "https://lrclib.net/api/search?track_name=\(encodedTitle)&artist_name=\(encodedArtist)"
         guard let url = URL(string: urlString) else {
-            print("[Lyrics] LRCLIB invalid URL for title: '\(cleanTitle)' artist: '\(cleanArtist)'")
+            debugPrint("[Lyrics] LRCLIB invalid URL for title: '\(cleanTitle)' artist: '\(cleanArtist)'")
             return []
         }
 
-        print("[Lyrics] LRCLIB request → \(urlString)")
+        debugPrint("[Lyrics] LRCLIB request → \(urlString)")
         let (data, response) = try await URLSession.shared.data(from: url)
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-        print("[Lyrics] LRCLIB response ← HTTP \(statusCode), \(data.count) bytes")
+        debugPrint("[Lyrics] LRCLIB response ← HTTP \(statusCode), \(data.count) bytes")
         if let http = response as? HTTPURLResponse, http.statusCode == 200 {
             // Try parse as array JSON (preferred)
             if let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-                print("[Lyrics] LRCLIB returned \(jsonArray.count) candidate(s)")
+                debugPrint("[Lyrics] LRCLIB returned \(jsonArray.count) candidate(s)")
             }
             if let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
                let bestMatch = bestLyricsMatch(in: jsonArray, artist: cleanArtist, title: cleanTitle, album: cleanAlbum) {
