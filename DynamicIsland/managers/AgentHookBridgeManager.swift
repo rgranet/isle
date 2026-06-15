@@ -49,10 +49,10 @@ final class AgentHookBridgeManager {
             server = s
             isRunning = true
             lastError = nil
-            print("📡 [Isle] BridgeServer listening on \(socketPath)")
+            debugPrint("📡 [Isle] BridgeServer listening on \(socketPath)")
         } catch {
             lastError = "\(error)"
-            print("⚠️ [Isle] BridgeServer failed to start: \(error.localizedDescription)")
+            debugPrint("⚠️ [Isle] BridgeServer failed to start: \(error.localizedDescription)")
         }
     }
 

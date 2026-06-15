@@ -236,7 +236,7 @@ final class AgentSessionStore: ObservableObject {
             sessions = merged
         }
 
-        print("📡 [Isle] applyLiveSnapshot → \(merged.count) sessions, attention=\(merged.contains { $0.phase.requiresAttention })")
+        debugPrint("📡 [Isle] applyLiveSnapshot → \(merged.count) sessions, attention=\(merged.contains { $0.phase.requiresAttention })")
     }
 
 
@@ -302,7 +302,7 @@ final class AgentSessionStore: ObservableObject {
         let merged = (liveHookSessions + discoveryOnly).sorted { $0.updatedAt > $1.updatedAt }
 
         let aliveCount = merged.filter { $0.isProcessAlive }.count
-        print("📡 [Isle] refreshSessions: discovery=\(discovered.count), procs=\(liveProcesses.count), alive=\(aliveCount), hook-live=\(liveHookSessions.count), total=\(merged.count)")
+        debugPrint("📡 [Isle] refreshSessions: discovery=\(discovered.count), procs=\(liveProcesses.count), alive=\(aliveCount), hook-live=\(liveHookSessions.count), total=\(merged.count)")
 
         if merged != sessions {
             sessions = merged

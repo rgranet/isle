@@ -12,6 +12,9 @@ Conventions:
 - Keep an `## Unreleased` section at the top while you work; rename it to the
   version number right before running `./scripts/release.sh <version>`.
 
+## Unreleased
+- Performance: drastically reduced idle CPU/energy use. The system-HUD suppression watcher no longer spawns a `pgrep` process ~7×/second (now a native in-process lookup), and Claude transcripts are only re-parsed when their files actually change (cached by modification date) instead of on every poll.
+
 ## 1.2.5
 - Calendar: a "more below" chevron now appears on the events/reminders list when items are hidden under the fold, and disappears once you scroll to the bottom.
 - Lyrics: Apple Music tracks now try their embedded lyrics first, with LRCLIB as a fallback; added diagnostics for missing lyrics.
