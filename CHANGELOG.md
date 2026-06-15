@@ -12,7 +12,7 @@ Conventions:
 - Keep an `## Unreleased` section at the top while you work; rename it to the
   version number right before running `./scripts/release.sh <version>`.
 
-## Unreleased
+## 1.2.6
 - Performance: drastically reduced idle CPU/energy use. The system-HUD suppression watcher no longer spawns a `pgrep` process ~7×/second (now a native in-process lookup), and Claude transcripts are only re-parsed when their files actually change (cached by modification date) instead of on every poll.
 
 ## 1.2.5
