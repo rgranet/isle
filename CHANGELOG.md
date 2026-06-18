@@ -12,6 +12,10 @@ Conventions:
 - Keep an `## Unreleased` section at the top while you work; rename it to the
   version number right before running `./scripts/release.sh <version>`.
 
+## 1.2.7
+- Shelf: new management controls — a "Select all" / "Deselect all" toggle and an "Erase all" button in the tray, plus a delete button that appears when you hover over an item.
+- Shelf: clearer selection — selected items now show a filled checkmark badge with a stronger highlight.
+
 ## 1.2.6
 - Performance: drastically reduced idle CPU/energy use. The system-HUD suppression watcher no longer spawns a `pgrep` process ~7×/second (now a native in-process lookup), and Claude transcripts are only re-parsed when their files actually change (cached by modification date) instead of on every poll.
 

@@ -78,6 +78,16 @@ final class ShelfSelectionModel: ObservableObject {
         selectedIDs = Set(rangeIDs)
     }
 
+    func selectAll(in allItems: [ShelfItem]) {
+        selectedIDs = Set(allItems.map(\.id))
+        lastAnchorID = allItems.last?.id
+    }
+
+    /// True when every item is selected (used to toggle the "Select all" button).
+    func allSelected(in allItems: [ShelfItem]) -> Bool {
+        !allItems.isEmpty && selectedIDs.count == allItems.count
+    }
+
     func clear() {
         selectedIDs.removeAll()
         lastAnchorID = nil

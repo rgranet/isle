@@ -73,6 +73,29 @@ final class ShelfStateViewModel: ObservableObject {
         ExtensionRPCServer.shared.notifyShelfItemsChanged(itemIDs: [item.id.uuidString], action: "removed")
     }
 
+    /// Removes every item from the shelf (the "Erase all" action).
+    func removeAll() {
+        guard !items.isEmpty else { return }
+        let removedIDs = items.map { $0.id.uuidString }
+        for item in items {
+            item.cleanupStoredData()
+        }
+        items.removeAll()
+        ExtensionRPCServer.shared.notifyShelfItemsChanged(itemIDs: removedIDs, action: "removed")
+    }
+
+    /// Removes a specific set of items (e.g. the current selection).
+    func remove(_ itemsToRemove: [ShelfItem]) {
+        guard !itemsToRemove.isEmpty else { return }
+        let removedIDs = itemsToRemove.map { $0.id.uuidString }
+        let removalSet = Set(itemsToRemove.map { $0.id })
+        for item in itemsToRemove {
+            item.cleanupStoredData()
+        }
+        items.removeAll { removalSet.contains($0.id) }
+        ExtensionRPCServer.shared.notifyShelfItemsChanged(itemIDs: removedIDs, action: "removed")
+    }
+
     func updateBookmark(for item: ShelfItem, bookmark: Data) {
         guard let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
         if case .file = items[idx].kind {
