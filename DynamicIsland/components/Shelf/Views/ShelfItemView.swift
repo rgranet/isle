@@ -35,6 +35,7 @@ struct ShelfItemView: View {
     @State private var showStack = false
     @State private var cachedPreviewImage: NSImage?
     @State private var debouncedDropTarget = false
+    @State private var isHovering = false
 
     private var isSelected: Bool { viewModel.isSelected }
     private var shouldHideDuringDrag: Bool { selection.isDragging && selection.isSelected(item.id) && false }
@@ -71,11 +72,19 @@ struct ShelfItemView: View {
                         viewModel.handleClick(event: event, view: nsview)
                     }
                 )
+
+                selectionBadge
+                deleteButton
             } else {
                 Color.clear
                     .frame(width: 105)
                     .padding(.vertical, 10)
                     .padding(.horizontal, 5)
+            }
+        }
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.12)) {
+                isHovering = hovering
             }
         }
         .onChange(of: viewModel.isDropTargeted) { _, targeted in
@@ -108,6 +117,43 @@ struct ShelfItemView: View {
     }
 
     // MARK: - View Components
+
+    /// Selection indicator: a filled accent checkmark in the top-leading corner
+    /// of selected items, so the selection reads clearly at a glance.
+    private var selectionBadge: some View {
+        Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 17))
+            .symbolRenderingMode(.palette)
+            .foregroundStyle(.white, Color.accentColor)
+            .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.top, 2)
+            .padding(.leading, 4)
+            .opacity(isSelected ? 1 : 0)
+            .scaleEffect(isSelected ? 1 : 0.5)
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+            .allowsHitTesting(false)
+    }
+
+    /// Per-item delete affordance shown on hover (top-trailing corner).
+    private var deleteButton: some View {
+        Button {
+            ShelfStateViewModel.shared.remove(item)
+        } label: {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 16))
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, Color.black.opacity(0.6))
+                .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 1)
+        }
+        .buttonStyle(.plain)
+        .help("Remove from shelf")
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        .padding(.top, 2)
+        .padding(.trailing, 4)
+        .opacity(isHovering && !selection.isDragging ? 1 : 0)
+        .allowsHitTesting(isHovering && !selection.isDragging)
+    }
 
     private var iconView: some View {
         Image(nsImage: viewModel.thumbnail ?? item.icon)
@@ -142,9 +188,9 @@ struct ShelfItemView: View {
 
     private var backgroundColor: Color {
         if debouncedDropTarget {
-            return Color.accentColor.opacity(0.25)
+            return Color.accentColor.opacity(0.3)
         } else if isSelected {
-            return Color.accentColor.opacity(0.15)
+            return Color.accentColor.opacity(0.3)
         } else {
             return Color.clear
         }
@@ -164,7 +210,7 @@ struct ShelfItemView: View {
         if debouncedDropTarget {
             return 3
         } else if isSelected {
-            return 2
+            return 2.5
         } else {
             return 1
         }

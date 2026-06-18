@@ -58987,6 +58987,50 @@
           }
         }
       }
+    },
+    "Select all": {
+      "comment": "Shelf toolbar button: select every item.",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout sélectionner"
+          }
+        }
+      }
+    },
+    "Deselect all": {
+      "comment": "Shelf toolbar button: clear the selection.",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout désélectionner"
+          }
+        }
+      }
+    },
+    "Erase all": {
+      "comment": "Shelf toolbar button: remove every item from the shelf.",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout effacer"
+          }
+        }
+      }
+    },
+    "Remove from shelf": {
+      "comment": "Per-item delete button tooltip on the shelf.",
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer du tiroir"
+          }
+        }
+      }
     }
   },
   "version": "1.2"

@@ -114,10 +114,55 @@ struct ShelfView: View {
                         .padding()
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                if !tvm.isEmpty {
+                    shelfToolbar
+                }
+            }
             .transaction { transaction in
                 transaction.animation = vm.animation
             }
             .contentShape(Rectangle())
+    }
+
+    private var shelfToolbar: some View {
+        HStack(spacing: 6) {
+            toolbarButton(
+                systemName: selection.allSelected(in: tvm.items) ? "checkmark.circle.fill" : "checkmark.circle",
+                help: selection.allSelected(in: tvm.items) ? "Deselect all" : "Select all",
+                tint: .white
+            ) {
+                if selection.allSelected(in: tvm.items) {
+                    selection.clear()
+                } else {
+                    selection.selectAll(in: tvm.items)
+                }
+            }
+
+            toolbarButton(systemName: "trash", help: "Erase all", tint: .red) {
+                selection.clear()
+                tvm.removeAll()
+            }
+        }
+        .padding(8)
+    }
+
+    private func toolbarButton(
+        systemName: String,
+        help: String,
+        tint: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(tint.opacity(0.9))
+                .frame(width: 24, height: 24)
+                .background(Circle().fill(Color.white.opacity(0.1)))
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .help(help)
     }
 
     var content: some View {
