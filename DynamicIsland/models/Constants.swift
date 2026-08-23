@@ -829,11 +829,11 @@ extension Defaults.Keys {
     static let accentColor = Key<Color>("accentColor", default: Color.blue)
     static let enableShadow = Key<Bool>("enableShadow", default: true)
     static let cornerRadiusScaling = Key<Bool>("cornerRadiusScaling", default: true)
-    // Progressive Siri/Droppy-style glass for the OPEN notch panel: opaque
+    // Progressive Siri-style glass for the OPEN notch panel: opaque
     // black at the top, melting into frosted glass toward the bottom edge.
     // The closed notch always stays opaque black (hardware blend).
     static let enableNotchLiquidGlass = Key<Bool>("enableNotchLiquidGlass", default: true)
-    /// Droppy-style floating dock of tab capsules below the open notch.
+    /// Floating dock of tab capsules below the open notch.
     /// Replaces the in-panel tab bar. Not available in minimalistic mode.
     static let enableNotchDock = Key<Bool>("enableNotchDock", default: true)
     /// Black opacity at the BOTTOM edge of the open panel.

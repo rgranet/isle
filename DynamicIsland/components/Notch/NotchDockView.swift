@@ -7,7 +7,7 @@
 import Defaults
 import SwiftUI
 
-/// Droppy-style floating dock: a detached capsule of tab buttons hovering
+/// Floating dock: a detached capsule of tab buttons hovering
 /// below the open notch panel, plus a separate circular settings button.
 /// Replaces the in-panel tab bar when `Defaults[.enableNotchDock]` is on.
 ///
