@@ -26,11 +26,6 @@ struct CodingAgentArrivedExpandedView: View {
     private var contentHeight: CGFloat { max(0, vm.effectiveClosedNotchHeight - 12) }
     private var wingWidth: CGFloat { contentHeight }
     private var centerWidth: CGFloat { max(vm.closedNotchSize.width, 120) }
-    /// Vertical space occupied by the physical MacBook notch cutout. Content
-    /// rendered inside this band is hidden by hardware, so the centered label
-    /// is pushed below it.
-    private var notchCutoutHeight: CGFloat { vm.closedNotchSize.height }
-    private var visibleBandHeight: CGFloat { max(0, contentHeight - notchCutoutHeight) }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -40,9 +35,12 @@ struct CodingAgentArrivedExpandedView: View {
             Rectangle()
                 .fill(.black)
                 .frame(width: centerWidth, height: contentHeight)
-                .overlay(alignment: .bottom) {
+                .overlay(alignment: .bottomLeading) {
+                    // Single line pinned to the bottom: the visible band
+                    // below the hardware cutout is too short for two lines
+                    // (the second one used to get clipped by the notch edge).
                     centerLabel
-                        .frame(height: visibleBandHeight)
+                        .padding(.bottom, 9)
                 }
                 .allowsHitTesting(false)
 
@@ -59,44 +57,42 @@ struct CodingAgentArrivedExpandedView: View {
 
     private var leftBadge: some View {
         let badge = contentHeight * 0.82
-        return ZStack {
-            RoundedRectangle(cornerRadius: badge * 0.28, style: .continuous)
-                .fill(brand)
-                .frame(width: badge + 4, height: badge + 4)
-                .blur(radius: 5)
-                .opacity(pulse ? 0.9 : 0.5)
-                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: pulse)
-
-            RoundedRectangle(cornerRadius: badge * 0.28, style: .continuous)
-                .fill(brand)
-                .frame(width: badge, height: badge)
-                .overlay(
-                    Image(systemName: "hand.raised.fill")
-                        .font(.system(size: badge * 0.5, weight: .bold))
-                        .foregroundStyle(.white)
-                )
-                .shadow(color: brand.opacity(0.5), radius: 4, y: 2)
-        }
-        .allowsHitTesting(false)
+        return RoundedRectangle(cornerRadius: badge * 0.28, style: .continuous)
+            .fill(brand)
+            .frame(width: badge, height: badge)
+            .overlay(
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: badge * 0.5, weight: .bold))
+                    .foregroundStyle(.white)
+            )
+            .shadow(color: brand.opacity(0.5), radius: 4, y: 2)
+            .siriGlow(
+                brand,
+                in: RoundedRectangle(cornerRadius: badge * 0.28, style: .continuous),
+                blurRadius: 5,
+                opacityRange: 0.5...0.9,
+                period: 1.0
+            )
+            .allowsHitTesting(false)
     }
 
     // MARK: Centered title — slides in from the right
 
     @ViewBuilder
     private var centerLabel: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text("Needs your approval")
-                .font(.system(size: 9, weight: .semibold))
+        HStack(spacing: 6) {
+            Text("Approval")
+                .font(.system(size: 10.5, weight: .bold))
                 .foregroundStyle(brand)
                 .tracking(0.4)
                 .textCase(.uppercase)
             Text(title)
-                .font(.system(size: 11.5, weight: .semibold))
+                .font(.system(size: 12.5, weight: .semibold))
                 .foregroundColor(.white)
-                .lineLimit(1)
         }
+        .lineLimit(1)
+        .minimumScaleFactor(0.85)
         .padding(.horizontal, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
         .opacity(slid ? 1 : 0)
         .offset(x: slid ? 0 : 16)
         .allowsHitTesting(false)

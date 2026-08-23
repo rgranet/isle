@@ -65,63 +65,11 @@ struct TabSelectionView: View {
     @Default(.enableMessagingApps) private var enableMessagingApps
     @Namespace var animation
     
+    // Tab list building lives in NotchTabCatalog (shared with NotchDockView).
+    // The @Default properties above stay declared so this view re-renders
+    // when the flags change.
     private var tabs: [TabModel] {
-        var tabsArray: [TabModel] = []
-
-        if homeTabVisible {
-            tabsArray.append(TabModel(label: "Home", icon: "house.fill", view: .home))
-        }
-
-        if enableCodingAgents {
-            tabsArray.append(TabModel(label: "Agents", icon: "sparkle", view: .codingAgents))
-        }
-
-        if enableNotchWeather {
-            tabsArray.append(TabModel(label: "Weather", icon: "cloud.sun.fill", view: .weather))
-        }
-
-        if enableMessagingApps {
-            tabsArray.append(TabModel(label: "Messages", icon: "bubble.left.and.bubble.right.fill", view: .messages))
-        }
-
-        if Defaults[.dynamicShelf] {
-            tabsArray.append(TabModel(label: "Shelf", icon: "tray.fill", view: .shelf))
-        }
-        
-        if enableTimerFeature && timerDisplayMode == .tab {
-            tabsArray.append(TabModel(label: "Timer", icon: "timer", view: .timer))
-        }
-
-        // Stats tab only shown when stats feature is enabled
-        if Defaults[.enableStatsFeature] {
-            tabsArray.append(TabModel(label: "Stats", icon: "chart.xyaxis.line", view: .stats))
-        }
-
-        if Defaults[.enableNotes] || (Defaults[.enableClipboardManager] && Defaults[.clipboardDisplayMode] == .separateTab) {
-            let label = Defaults[.enableNotes] ? "Notes" : "Clipboard"
-            let icon = Defaults[.enableNotes] ? "note.text" : "doc.on.clipboard"
-            tabsArray.append(TabModel(label: label, icon: icon, view: .notes))
-        }
-        if Defaults[.enableTerminalFeature] {
-            tabsArray.append(TabModel(label: "Terminal", icon: "apple.terminal", view: .terminal))
-        }
-        if extensionTabsEnabled {
-            for payload in extensionTabPayloads {
-                guard let tab = payload.descriptor.tab else { continue }
-                let accent = payload.descriptor.accentColor.swiftUIColor
-                let iconName = tab.iconSymbolName ?? "puzzlepiece.extension"
-                tabsArray.append(
-                    TabModel(
-                        label: tab.title,
-                        icon: iconName,
-                        view: .extensionExperience,
-                        experienceID: payload.descriptor.id,
-                        accentColor: accent
-                    )
-                )
-            }
-        }
-        return tabsArray
+        NotchTabCatalog.tabs()
     }
     var body: some View {
         HStack(spacing: 24) {
@@ -160,21 +108,6 @@ struct TabSelectionView: View {
         .onAppear {
             ensureValidSelection(with: tabs)
         }
-    }
-
-    private var extensionTabsEnabled: Bool {
-        enableThirdPartyExtensions && enableExtensionNotchExperiences && enableExtensionNotchTabs
-    }
-
-    private var extensionTabPayloads: [ExtensionNotchExperiencePayload] {
-        extensionNotchExperienceManager.activeExperiences.filter { $0.descriptor.tab != nil }
-    }
-
-    private var homeTabVisible: Bool {
-        if enableMinimalisticUI {
-            return true
-        }
-        return showStandardMediaControls || showCalendar || showMirror
     }
 
     private func isSelected(_ tab: TabModel) -> Bool {

@@ -39,11 +39,14 @@ struct DynamicIslandHeader: View {
     @Default(.showBatteryIndicator) var showBatteryIndicator
     @Default(.showBatteryPercentInside) var showBatteryPercentInside
     @Default(.enableMinimalisticUI) var enableMinimalisticUI
-    
+    @Default(.enableNotchDock) var enableNotchDock
+
     var body: some View {
         HStack(spacing: 0) {
             HStack {
-                if !enableMinimalisticUI {
+                // With the floating dock enabled the tabs live below the
+                // panel (NotchDockView) instead of in the header.
+                if !enableMinimalisticUI && !enableNotchDock {
                     let shouldShowTabs = coordinator.alwaysShowTabs || vm.notchState == .open || !shelfState.items.isEmpty
                     if shouldShowTabs {
                         TabSelectionView()

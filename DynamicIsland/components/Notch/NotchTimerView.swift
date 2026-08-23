@@ -41,6 +41,8 @@ struct NotchTimerView: View {
     @State private var customSeconds: Int = 0
     @State private var isSyncingCustomDuration = false
     @State private var lockedAccentColor: Color?
+    @State private var scrollSuppressionToken = UUID()
+    @State private var autoCloseSuppressionToken = UUID()
 
     var body: some View {
         Group {
@@ -58,6 +60,15 @@ struct NotchTimerView: View {
                 .padding(.horizontal, 16)
                     .padding(.vertical, 6)
                 .transition(.opacity.combined(with: .blurReplace))
+                // Scrolling the presets list must not trigger the notch's
+                // scroll-up-to-close gesture — same pattern as
+                // NotchCodingAgentsView.updateSuppression.
+                .onHover { hovering in
+                    updateSuppression(for: hovering)
+                }
+                .onDisappear {
+                    updateSuppression(for: false)
+                }
                 .onAppear { syncCustomDuration(with: customTimerDuration) }
                 .onChange(of: customTimerDuration) { _, newValue in syncCustomDuration(with: newValue) }
                 .onChange(of: customHours) { _, _ in updateStoredCustomDuration() }
@@ -130,18 +141,7 @@ struct NotchTimerView: View {
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
                     .scrollIndicators(.never)
-
-                    LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 16)
-                        .allowsHitTesting(false)
-                        .alignmentGuide(.top) { d in d[.top] }
-                        .frame(maxHeight: .infinity, alignment: .top)
-
-                    LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 16)
-                        .allowsHitTesting(false)
-                        .alignmentGuide(.bottom) { d in d[.bottom] }
-                        .frame(maxHeight: .infinity, alignment: .bottom)
+                    .fadedVerticalEdges(height: 16)
                 }
                 .frame(height: listHeight)
             }
@@ -520,6 +520,13 @@ struct NotchTimerView: View {
             customSeconds = 0
         }
         customTimerDuration = 0
+    }
+
+    /// While the cursor is over the timer tab, disable the scroll-to-close
+    /// gesture and the auto-close so scrolling the presets list is safe.
+    private func updateSuppression(for hovering: Bool) {
+        vm.setScrollGestureSuppression(hovering, token: scrollSuppressionToken)
+        vm.setAutoCloseSuppression(hovering, token: autoCloseSuppressionToken)
     }
 
     private func syncCustomDuration(with value: Double) {

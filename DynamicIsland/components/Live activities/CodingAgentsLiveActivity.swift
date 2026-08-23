@@ -39,7 +39,7 @@ struct CodingAgentsLiveActivity: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            ForEach(Array(dotsToShow.enumerated()), id: \.offset) { _, hex in
+            ForEach(dotsToShow, id: \.self) { hex in
                 Circle()
                     .fill(Color(isleHex: hex))
                     .frame(width: 7, height: 7)

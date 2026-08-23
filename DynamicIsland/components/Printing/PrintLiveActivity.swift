@@ -81,9 +81,7 @@ struct PrintLiveActivity: View {
                                     .lineLimit(1)
                                     .padding(.trailing, 8)
                             } else {
-                                ProgressView()
-                                    .controlSize(.small)
-                                    .tint(tint)
+                                SiriDotsSpinner(color: .white, size: 15)
                                     .padding(.trailing, 8)
                             }
                         }

@@ -141,6 +141,19 @@ let statsGridSpacingHeight: CGFloat = 12
 let notchShadowPaddingStandard: CGFloat = 18
 let notchShadowPaddingMinimalistic: CGFloat = 12
 
+// Floating dock (Droppy-style) below the open notch panel.
+let notchDockGap: CGFloat = 8
+let notchDockHeight: CGFloat = 38
+/// Extra breathing room under the dock so its shadow isn't clipped.
+let notchDockBottomClearance: CGFloat = 8
+
+/// Vertical space reserved inside the notch window for the floating dock.
+/// Zero when the dock is disabled or in minimalistic mode.
+func notchDockReservedHeight(isMinimalistic: Bool) -> CGFloat {
+    guard Defaults[.enableNotchDock], !isMinimalistic else { return 0 }
+    return notchDockGap + notchDockHeight + notchDockBottomClearance
+}
+
 @MainActor
 var minimalisticOpenNotchSize: CGSize {
     var size = minimalisticBaseOpenNotchSize
@@ -245,7 +258,12 @@ func notchShadowPaddingValue(isMinimalistic: Bool) -> CGFloat {
 }
 
 func addShadowPadding(to size: CGSize, isMinimalistic: Bool) -> CGSize {
-    CGSize(width: size.width, height: size.height + notchShadowPaddingValue(isMinimalistic: isMinimalistic))
+    CGSize(
+        width: size.width,
+        height: size.height
+            + notchShadowPaddingValue(isMinimalistic: isMinimalistic)
+            + notchDockReservedHeight(isMinimalistic: isMinimalistic)
+    )
 }
 
 /// Determines whether a specific screen should render the Dynamic Island pill
