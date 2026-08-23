@@ -13,6 +13,47 @@
         -->
 
         <item>
+            <title>Isle 1.3.0</title>
+            <link>https://github.com/rgranet/isle/releases/tag/v1.3.0</link>
+            <sparkle:version>24</sparkle:version>
+            <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: -apple-system, Helvetica, sans-serif; font-size: 13px; line-height: 1.45; color: #1d1d1f; margin: 0; padding: 10px 6px; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin-bottom: 5px; }
+  p { margin: 0 0 6px; }
+  @media (prefers-color-scheme: dark) { body { color: #f5f5f7; } }
+</style>
+</head>
+<body>
+  <h2>Isle 1.3.0</h2>
+    <ul>
+      <li>New floating dock: the tab bar now floats as a detached capsule below the open notch (with a separate circular Settings button). The in-panel tab row disappears when the dock is on. Toggle in Settings → Appearance → Open Notch → &quot;Floating dock&quot;.</li>
+      <li>Liquid glass notch: the open notch now uses a progressive Siri-style glass surface — black at the top for perfect contrast, melting into real frosted glass toward the bottom edge where the wallpaper glows through, finished with a subtle luminous rim. Tune the bottom darkness or disable it in Settings → Appearance → Open Notch. The closed notch stays black to blend with the camera housing.</li>
+      <li>Meet the Isle mascot: a glassy little island robot now waves you in on the welcome screen and keeps the Agents and Messages empty states company (sleeping when nothing&#x27;s happening, smiling at inbox zero). The menu bar icon is now its face — a pill glyph with two eyes and the status LED, adapting to light/dark as a template.</li>
+      <li>Notification banners polished: the &quot;new message&quot; and &quot;needs approval&quot; closed-notch banners no longer clip their text against the bottom edge — the label is now a single line pinned below the camera cutout — and their icon halos use the shared breathing-glow effect.</li>
+      <li>Widgets now integrate cleanly with the glass surface: the scroll-edge fades in Calendar, Events, Notes and Timer lists no longer paint dark bands over the panel — content fades out through a transparency mask instead. The note editor also lost its opaque black canvas and now sits directly on the glass.</li>
+      <li>New Siri-style glowing dots spinner (liquid-glass look): the print live activity now shows a luminous orbiting-dots indicator instead of the stock spinner while page counts are unknown.</li>
+      <li>Agent attention badges: the pulsing brand-color glow is now a shared, smoother &quot;breathing halo&quot; effect across all coding-agent live activities.</li>
+    </ul>
+</body>
+</html>
+            ]]></description>
+            <pubDate>Sun, 23 Aug 2026 13:06:43 +0000</pubDate>
+            <enclosure
+                url="https://github.com/rgranet/isle/releases/download/v1.3.0/Isle-1.3.0.dmg"
+                length="28420679"
+                type="application/octet-stream"
+                sparkle:edSignature="8zX48sthzQHN4LM+ZBDXge9jXQen/EDuOUsRRWmR4llhmlku4ouuzLIlZEeQezaApLZMXliHAsXH2sa0muQqDQ==" />
+        </item>
+        <item>
             <title>Isle 1.2.7</title>
             <link>https://github.com/rgranet/isle/releases/tag/v1.2.7</link>
             <sparkle:version>23</sparkle:version>
