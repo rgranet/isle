@@ -141,7 +141,7 @@ let statsGridSpacingHeight: CGFloat = 12
 let notchShadowPaddingStandard: CGFloat = 18
 let notchShadowPaddingMinimalistic: CGFloat = 12
 
-// Floating dock (Droppy-style) below the open notch panel.
+// Floating dock below the open notch panel.
 let notchDockGap: CGFloat = 8
 let notchDockHeight: CGFloat = 38
 /// Extra breathing room under the dock so its shadow isn't clipped.

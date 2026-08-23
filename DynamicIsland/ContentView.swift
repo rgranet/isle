@@ -530,7 +530,7 @@ struct ContentView: View {
 
     /// The notch surface. Closed: opaque black so the shape melts into the
     /// physical camera housing. Open (with the setting enabled):
-    /// Droppy/Siri-style *progressive* glass — opaque black over the top
+    /// Siri-style *progressive* glass — opaque black over the top
     /// where the content lives, melting into translucent frosted glass
     /// toward the bottom edge so the blurred wallpaper glows through the
     /// rounded corners. The blur extends past the top edge so its own
@@ -594,7 +594,7 @@ struct ContentView: View {
                     : .clear,
                 radius: Defaults[.cornerRadiusScaling] ? 10 : 5
             )
-            // Floating dock (Droppy-style). Anchored to the panel's bottom
+            // Floating dock. Anchored to the panel's bottom
             // edge, offset down by its own height so it floats detached
             // below the glass. Rendered after .shadow so it carries its own
             // chrome instead of inheriting the panel shadow.

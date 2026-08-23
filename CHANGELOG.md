@@ -12,8 +12,8 @@ Conventions:
 - Keep an `## Unreleased` section at the top while you work; rename it to the
   version number right before running `./scripts/release.sh <version>`.
 
-## Unreleased
-- New floating dock: the tab bar now floats as a detached capsule below the open notch (with a separate circular Settings button), Droppy-style. The in-panel tab row disappears when the dock is on. Toggle in Settings → Appearance → Open Notch → "Floating dock".
+## 1.3.0
+- New floating dock: the tab bar now floats as a detached capsule below the open notch (with a separate circular Settings button). The in-panel tab row disappears when the dock is on. Toggle in Settings → Appearance → Open Notch → "Floating dock".
 - Liquid glass notch: the open notch now uses a progressive Siri-style glass surface — black at the top for perfect contrast, melting into real frosted glass toward the bottom edge where the wallpaper glows through, finished with a subtle luminous rim. Tune the bottom darkness or disable it in Settings → Appearance → Open Notch. The closed notch stays black to blend with the camera housing.
 - Meet the Isle mascot: a glassy little island robot now waves you in on the welcome screen and keeps the Agents and Messages empty states company (sleeping when nothing's happening, smiling at inbox zero). The menu bar icon is now its face — a pill glyph with two eyes and the status LED, adapting to light/dark as a template.
 - Notification banners polished: the "new message" and "needs approval" closed-notch banners no longer clip their text against the bottom edge — the label is now a single line pinned below the camera cutout — and their icon halos use the shared breathing-glow effect.
