@@ -23,6 +23,14 @@ import Defaults
 private final class LiquidGlassContainerView: NSView {
     weak var glassView: NSView?
     var hostingView: NSHostingView<AnyView>?
+    /// When true the glass never participates in AppKit hit testing, so
+    /// SwiftUI hover/click detection above it keeps working (required when
+    /// used as the notch surface background).
+    var passthroughHitTesting = false
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        passthroughHitTesting ? nil : super.hitTest(point)
+    }
 
     private var observedBackdropLayers: [CALayer] = []
     private var hasScheduledBackdropSetup = false
@@ -122,6 +130,12 @@ private final class LiquidGlassContainerView: NSView {
     }
 }
 
+/// NSVisualEffectView that never participates in hit testing (fallback
+/// counterpart of `LiquidGlassContainerView.passthroughHitTesting`).
+private final class PassthroughVisualEffectView: NSVisualEffectView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+}
+
 /// All 20 available liquid‑glass variants.
 /// Apple does not publicly describe how each value looks so experiment and pick the one you like!
 public enum LiquidGlassVariant: Int, CaseIterable, Identifiable, Defaults.Serializable, Sendable {
@@ -159,18 +173,24 @@ public struct LiquidGlassBackground<Content: View>: NSViewRepresentable {
     private let content: Content
     private let cornerRadius: CGFloat
     private let variant: LiquidGlassVariant
+    private let passthroughHitTesting: Bool
     /// Creates a new liquid‑glass container.
     /// - Parameters:
     ///   - variant: Any ``LiquidGlassVariant`` (0–19). Defaults to `.v11`, which is visually super pleasing
     ///   - cornerRadius: Corner radius in points. Defaults to `10`.
+    ///   - passthroughHitTesting: When `true` the glass is invisible to
+    ///     AppKit hit testing (use for purely decorative backgrounds under
+    ///     interactive SwiftUI content, e.g. the notch surface).
     ///   - content: Your SwiftUI hierarchy.
     public init(
         variant: LiquidGlassVariant = .defaultVariant,
         cornerRadius: CGFloat = 10,
+        passthroughHitTesting: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.variant      = variant
         self.cornerRadius = cornerRadius
+        self.passthroughHitTesting = passthroughHitTesting
         self.content      = content()
     }
 
@@ -214,6 +234,7 @@ public struct LiquidGlassBackground<Content: View>: NSViewRepresentable {
         if let glassType = NSClassFromString("NSGlassEffectView") as? NSView.Type {
             let container = LiquidGlassContainerView(frame: .zero)
             container.translatesAutoresizingMaskIntoConstraints = false
+            container.passthroughHitTesting = passthroughHitTesting
 
             let glass = glassType.init(frame: .zero)
             glass.translatesAutoresizingMaskIntoConstraints = false
@@ -239,7 +260,9 @@ public struct LiquidGlassBackground<Content: View>: NSViewRepresentable {
         }
 
         // Fallback for earlier macOS – use an ordinary blur.
-        let fallback = NSVisualEffectView()
+        let fallback = passthroughHitTesting
+            ? PassthroughVisualEffectView()
+            : NSVisualEffectView()
         fallback.material = .underWindowBackground
 
         let hosting = NSHostingView(rootView: content)
@@ -257,6 +280,7 @@ public struct LiquidGlassBackground<Content: View>: NSViewRepresentable {
     public func updateNSView(_ nsView: NSView, context: Context) {
         if let container = nsView as? LiquidGlassContainerView,
            let glass = container.glassView {
+            container.passthroughHitTesting = passthroughHitTesting
             container.hostingView?.rootView = AnyView(content)
             glass.setValue(cornerRadius, forKey: "cornerRadius")
             callPrivateVariantSetter(on: glass, value: variant.rawValue)

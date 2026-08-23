@@ -201,20 +201,8 @@ struct CalendarView: View {
                         .foregroundColor(Color(white: 0.65))
                 }
 
-                ZStack(alignment: .top) {
-                    WheelPicker(selectedDate: $selectedDate, config: Config())
-                    HStack(alignment: .top) {
-                        LinearGradient(
-                            colors: [Color.black, .clear], startPoint: .leading, endPoint: .trailing
-                        )
-                        .frame(width: 20)
-                        Spacer()
-                        LinearGradient(
-                            colors: [.clear, Color.black], startPoint: .leading, endPoint: .trailing
-                        )
-                        .frame(width: 20)
-                    }
-                }
+                WheelPicker(selectedDate: $selectedDate, config: Config())
+                    .fadedHorizontalEdges(width: 20)
             }
 
             let filteredEvents = EventListView.filteredEvents(
@@ -415,31 +403,20 @@ struct StandaloneCalendarView: View {
                             }
                         }
 
-                        ZStack {
-                            ScrollView(.vertical, showsIndicators: false) {
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 14), spacing: 6), count: 7), spacing: 6) {
-                                    ForEach(monthDays, id: \.self) { day in
-                                        dayCell(for: day)
-                                            .id(calendar.startOfDay(for: day))
-                                    }
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 14), spacing: 6), count: 7), spacing: 6) {
+                                ForEach(monthDays, id: \.self) { day in
+                                    dayCell(for: day)
+                                        .id(calendar.startOfDay(for: day))
                                 }
-                                .padding(.bottom, 2)
                             }
-                            .onChange(of: datePickerScrollTarget) { _, target in
-                                guard let target else { return }
-                                centerDatePicker(on: target, proxy: proxy)
-                            }
-
-                            LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
-                                .frame(height: 16)
-                                .allowsHitTesting(false)
-                                .frame(maxHeight: .infinity, alignment: .top)
-
-                            LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
-                                .frame(height: 16)
-                                .allowsHitTesting(false)
-                                .frame(maxHeight: .infinity, alignment: .bottom)
+                            .padding(.bottom, 2)
                         }
+                        .onChange(of: datePickerScrollTarget) { _, target in
+                            guard let target else { return }
+                            centerDatePicker(on: target, proxy: proxy)
+                        }
+                        .fadedVerticalEdges(height: 16)
                         .frame(height: max(0, pickerViewportHeight - 22))
                         .clipped()
                     }
@@ -629,16 +606,7 @@ private struct StandaloneEventCardList: View {
                 .padding(.vertical, 2)
             }
             .clipped()
-
-            LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
-                .frame(height: 16)
-                .allowsHitTesting(false)
-                .frame(maxHeight: .infinity, alignment: .top)
-
-            LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
-                .frame(height: 16)
-                .allowsHitTesting(false)
-                .frame(maxHeight: .infinity, alignment: .bottom)
+            .fadedVerticalEdges(height: 16)
 
             if hasMoreBelow {
                 MoreBelowChevron()
@@ -870,16 +838,7 @@ struct EventListView: View {
                     }
                 }
                 .scrollIndicators(.never)
-
-                LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
-                    .frame(height: 16)
-                    .allowsHitTesting(false)
-                    .frame(maxHeight: .infinity, alignment: .top)
-
-                LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
-                    .frame(height: 16)
-                    .allowsHitTesting(false)
-                    .frame(maxHeight: .infinity, alignment: .bottom)
+                .fadedVerticalEdges(height: 16)
 
                 if hasMoreBelow {
                     MoreBelowChevron()

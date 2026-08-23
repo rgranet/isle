@@ -59,6 +59,10 @@ struct ContentView: View {
     @ObservedObject var codingAgentsStore = AgentSessionStore.shared
     @ObservedObject var messagingMonitor = MessagingAppMonitor.shared
     
+    @Default(.enableNotchLiquidGlass) var enableNotchLiquidGlass
+    @Default(.notchLiquidGlassDimming) var notchLiquidGlassDimming
+    @Default(.enableNotchDock) var enableNotchDock
+    @State private var lastTabSwitchDate = Date.distantPast
     @Default(.enableStatsFeature) var enableStatsFeature
     @Default(.showCpuGraph) var showCpuGraph
     @Default(.showMemoryGraph) var showMemoryGraph
@@ -149,7 +153,7 @@ struct ContentView: View {
         if coordinator.currentView == .timer {
             return CGSize(width: baseSize.width, height: 250) // Extra height for timer presets
         }
-        
+
         if coordinator.currentView == .notes || coordinator.currentView == .clipboard {
             let preferredHeight = coordinator.notesLayoutState.preferredHeight
             let resolvedHeight = max(baseSize.height, preferredHeight)
@@ -510,13 +514,79 @@ struct ContentView: View {
         installRootLifecycleHandlers(on: rootBodyView)
     }
 
+    /// Corner radius handed to the glass surface. The outer `.clipShape`
+    /// still cuts the exact notch/pill silhouette; this only needs to match
+    /// the *bottom* rounding so the glass edge follows the visible corners.
+    private var openGlassCornerRadius: CGFloat {
+        if isDynamicIslandMode {
+            return dynamicIslandPillCornerRadiusInsets.opened
+        }
+        return activeCornerRadiusInsets.opened.bottom
+    }
+
+    private var notchGlassActive: Bool {
+        enableNotchLiquidGlass && vm.notchState == .open
+    }
+
+    /// The notch surface. Closed: opaque black so the shape melts into the
+    /// physical camera housing. Open (with the setting enabled):
+    /// Droppy/Siri-style *progressive* glass — opaque black over the top
+    /// where the content lives, melting into translucent frosted glass
+    /// toward the bottom edge so the blurred wallpaper glows through the
+    /// rounded corners. The blur extends past the top edge so its own
+    /// rounded top corners never carve into the visible silhouette.
+    @ViewBuilder
+    private var notchSurfaceBackground: some View {
+        ZStack {
+            if notchGlassActive {
+                NotchGlassSurface(cornerRadius: openGlassCornerRadius)
+                    .padding(.top, -openGlassCornerRadius)
+                LinearGradient(
+                    stops: [
+                        .init(color: .black, location: 0.0),
+                        .init(color: .black, location: 0.38),
+                        .init(
+                            color: .black.opacity(min(max(notchLiquidGlassDimming, 0), 1)),
+                            location: 1.0
+                        )
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            } else {
+                Color.black
+            }
+        }
+        .allowsHitTesting(false)
+    }
+
+    /// Thin luminous rim along the bottom rounded edge of the open glass
+    /// panel — the "cut glass edge" highlight. Fades to nothing at the top
+    /// so no line ever shows along the screen edge.
+    @ViewBuilder
+    private var notchGlassEdgeHighlight: some View {
+        if notchGlassActive {
+            resolvedClipShape
+                .stroke(
+                    LinearGradient(
+                        colors: [.clear, .white.opacity(0.28)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 1
+                )
+                .allowsHitTesting(false)
+        }
+    }
+
     private var mainLayoutBase: some View {
         NotchLayout()
             .frame(alignment: .top)
             .padding(.horizontal, notchHorizontalPadding)
             .padding([.horizontal, .bottom], vm.notchState == .open ? 12 : 0)
-            .background(.black)
+            .background { notchSurfaceBackground }
             .clipShape(resolvedClipShape)
+            .overlay { notchGlassEdgeHighlight }
             .compositingGroup()
             .shadow(
                 color: ((vm.notchState == .open || isHovering) && Defaults[.enableShadow])
@@ -524,10 +594,67 @@ struct ContentView: View {
                     : .clear,
                 radius: Defaults[.cornerRadiusScaling] ? 10 : 5
             )
+            // Floating dock (Droppy-style). Anchored to the panel's bottom
+            // edge, offset down by its own height so it floats detached
+            // below the glass. Rendered after .shadow so it carries its own
+            // chrome instead of inheriting the panel shadow.
+            .overlay(alignment: .bottom) {
+                if notchDockActive {
+                    // GeometryReader gives the panel's REAL rendered height
+                    // (tab content can exceed the per-tab window estimate,
+                    // e.g. Weather). The dock drops gap+height below the
+                    // panel but is pulled back up just enough to always stay
+                    // inside the window instead of being clipped.
+                    GeometryReader { geo in
+                        NotchDockView()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                            .offset(y: dockDropOffset(panelHeight: geo.size.height))
+                    }
+                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top)))
+                }
+            }
             // Extra horizontal inset for Dynamic Island mode so the shadow
             // is not clipped by the outer frame constraint
             .padding(.horizontal, isIslandMode ? dynamicIslandShadowInset : 0)
             .padding(.top, pillTopOffset)
+    }
+
+    private var notchDockActive: Bool {
+        enableNotchDock
+            && !Defaults[.enableMinimalisticUI]
+            && vm.notchState == .open
+    }
+
+    /// Hit-test shape for the notch's hover/click handlers. When the
+    /// floating dock is visible it extends below the panel to cover the
+    /// dock strip, so moving the cursor onto the dock never reads as
+    /// "left the notch" (which would auto-close it before a click lands).
+    private var notchInteractionShape: AnyShape {
+        guard notchDockActive else { return resolvedClipShape }
+        return AnyShape(NotchWithDockHoverShape(base: resolvedClipShape))
+    }
+
+    /// Max height PROPOSED to the panel's layout. Deliberately EXCLUDES the
+    /// dock reservation: greedy tab layouts (Weather fills whatever height
+    /// it is offered) would otherwise grow into the dock's strip. The
+    /// window itself is taller (`addShadowPadding` adds the reservation),
+    /// so the dock overlay hangs below this frame, inside the window.
+    private var rootContentMaxHeight: CGFloat {
+        dynamicNotchSize.height + currentShadowPadding
+            + (isDynamicIslandMode ? dynamicIslandTopOffset : 0)
+    }
+
+    /// How far below the panel's bottom edge the dock sits. Normally
+    /// `notchDockGap + notchDockHeight`; reduced when the panel rendered
+    /// taller than the window estimate so the dock never leaves the window.
+    private func dockDropOffset(panelHeight: CGFloat) -> CGFloat {
+        let fullDrop = notchDockGap + notchDockHeight
+        let neededStrip = fullDrop + notchDockBottomClearance
+        let windowContentHeight = rootContentMaxHeight
+            + notchDockReservedHeight(isMinimalistic: Defaults[.enableMinimalisticUI])
+        let available = windowContentHeight - pillTopOffset - panelHeight
+        let shortfall = max(0, neededStrip - available)
+        return fullDrop - shortfall
     }
 
     private var configuredMainLayout: some View {
@@ -553,7 +680,7 @@ struct ContentView: View {
             }
             .conditionalModifier(interactionsEnabled) { view in
                 view
-                    .contentShape(resolvedClipShape)
+                    .contentShape(notchInteractionShape)
                     .onHover { hovering in
                         handleHover(hovering)
                     }
@@ -709,10 +836,13 @@ struct ContentView: View {
         }
         .frame(
             maxWidth: dynamicNotchSize.width + (isDynamicIslandMode ? dynamicIslandShadowInset * 2 : 0),
-            maxHeight: dynamicNotchSize.height + currentShadowPadding + (isDynamicIslandMode ? dynamicIslandTopOffset : 0),
+            maxHeight: rootContentMaxHeight,
             alignment: .top
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .onChange(of: coordinator.currentView) { _, _ in
+            lastTabSwitchDate = Date()
+        }
         .environmentObject(privacyManager)
         .background(dragDetector)
         .environmentObject(vm)
@@ -2134,8 +2264,14 @@ struct ContentView: View {
                 }
             }
         } else {
+            // A tab switch can shrink the panel under the cursor (taller tab
+            // → shorter one): the pointer suddenly sits outside the hover
+            // shape through no movement of its own. Give the user a longer
+            // grace period to re-enter before auto-closing; re-entering
+            // cancels this task via hoverTask?.cancel() above.
+            let closeDelay: Int = Date().timeIntervalSince(lastTabSwitchDate) < 1.0 ? 800 : 100
             hoverTask = Task {
-                try? await Task.sleep(for: .milliseconds(100))
+                try? await Task.sleep(for: .milliseconds(closeDelay))
                 guard !Task.isCancelled else { return }
 
                 await MainActor.run {

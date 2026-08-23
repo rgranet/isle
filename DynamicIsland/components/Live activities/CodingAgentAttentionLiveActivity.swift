@@ -24,7 +24,6 @@ struct CodingAgentAttentionLiveActivity: View {
     @ObservedObject var store: AgentSessionStore
     @EnvironmentObject private var vm: DynamicIslandViewModel
 
-    @State private var pulse: Bool = false
     /// "Just arrived" scale-puff state. Triggered on first appear AND
     /// whenever the count of attention-requiring sessions increases,
     /// so a fresh permission request re-pulses even if one was already
@@ -69,7 +68,6 @@ struct CodingAgentAttentionLiveActivity: View {
             .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
             .scaleEffect(puff)
             .onAppear {
-                pulse = true
                 lastAttentionCount = attentionCount
                 triggerPuff()
             }
@@ -104,15 +102,6 @@ struct CodingAgentAttentionLiveActivity: View {
         let brand = Color(isleHex: session.tool.brandColorHex)
         let badgeSize = notchContentHeight * 0.92
         ZStack {
-            // Soft brand-color glow that breathes — the visual "I'm not
-            // going away until you handle me" cue.
-            RoundedRectangle(cornerRadius: badgeSize * 0.28, style: .continuous)
-                .fill(brand)
-                .frame(width: badgeSize + 4, height: badgeSize + 4)
-                .blur(radius: 4)
-                .opacity(pulse ? 0.85 : 0.45)
-                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: pulse)
-
             // Use a per-agent icon asset if one has been added to
             // Assets.xcassets (claudeicon, codexicon, cursoricon, …).
             // Falls back to a brand-color rounded square with the first
@@ -143,6 +132,9 @@ struct CodingAgentAttentionLiveActivity: View {
                     .shadow(color: brand.opacity(0.4), radius: 3, y: 1)
             }
         }
+        // Soft brand-color glow that breathes — the visual "I'm not
+        // going away until you handle me" cue.
+        .siriGlow(brand, in: RoundedRectangle(cornerRadius: badgeSize * 0.28, style: .continuous))
         .allowsHitTesting(false)
     }
 
@@ -172,22 +164,15 @@ struct CodingAgentAttentionLiveActivity: View {
         let brand = Color(isleHex: session.tool.brandColorHex)
         HStack(spacing: 4) {
             Spacer(minLength: 0)
-            ZStack {
+            Image(systemName: signalSymbol(for: session))
+                .font(.system(size: notchContentHeight * 0.58, weight: .bold))
+                .foregroundStyle(brand)
+                .symbolRenderingMode(.hierarchical)
+                .frame(width: notchContentHeight * 0.7, height: notchContentHeight * 0.7)
                 // Outer halo — same breathing pulse so left + right read
                 // as a single coordinated indicator.
-                Circle()
-                    .fill(brand)
-                    .frame(width: notchContentHeight * 0.82, height: notchContentHeight * 0.82)
-                    .blur(radius: 4)
-                    .opacity(pulse ? 0.55 : 0.15)
-                    .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: pulse)
-
-                Image(systemName: signalSymbol(for: session))
-                    .font(.system(size: notchContentHeight * 0.58, weight: .bold))
-                    .foregroundStyle(brand)
-                    .symbolRenderingMode(.hierarchical)
-            }
-            .padding(.trailing, 6)
+                .siriGlow(brand, spread: notchContentHeight * 0.06, opacityRange: 0.15...0.55)
+                .padding(.trailing, 6)
         }
         .allowsHitTesting(false)
     }

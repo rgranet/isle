@@ -192,9 +192,11 @@ struct NotchCodingAgentsView: View {
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 30, weight: .light))
-                .foregroundStyle(.purple.opacity(0.75))
+            Image("islemascot-sleeping")
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 52)
             Text("No active coding sessions")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.9))

@@ -36,13 +36,13 @@ struct WelcomeView: View {
                     .offset(y: -5)
                     .background(SparkleView().opacity(0.6))
                 VStack(spacing: 8) {
-                    // Use the current AppIcon directly so this surface always
-                    // reflects whatever the user just dropped into the icon
-                    // slot — no need to keep a duplicate `logo2` asset in sync.
-                    Image(nsImage: NSApplication.shared.applicationIconImage)
+                    // Isle's mascot waves the user in.
+                    Image("islemascot-wave")
                         .resizable()
+                        .interpolation(.high)
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 100, height: 100)
+                        .frame(width: 130, height: 130)
+                        .shadow(color: .cyan.opacity(0.25), radius: 18, y: 4)
                         .padding(.bottom, 8)
                     Text("Isle")
                         .font(.system(.largeTitle, design: .default))

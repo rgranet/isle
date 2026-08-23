@@ -322,11 +322,12 @@ class DynamicIslandViewModel: NSObject, ObservableObject {
         return closedNotchSize.height
     }
 
-    /// Target height while an Isle arrival expansion is showing (~2.4×
+    /// Target height while an Isle arrival expansion is showing (~2.6×
     /// the typical closed notch height — enough room for a bigger icon
-    /// + a 1-line label + an unread badge, without going so tall that
-    /// the user feels the notch is "opening").
-    static let arrivalExpansionHeight: CGFloat = 72
+    /// + a 1-line label with breathing room below the camera cutout
+    /// + an unread badge, without going so tall that the user feels the
+    /// notch is "opening").
+    static let arrivalExpansionHeight: CGFloat = 80
 
     func isMouseHovering(position: NSPoint = NSEvent.mouseLocation) -> Bool {
         let screenFrame = getScreenFrame(screen)

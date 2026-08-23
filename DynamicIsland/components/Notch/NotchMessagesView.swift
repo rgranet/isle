@@ -111,9 +111,11 @@ struct NotchMessagesView: View {
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 30, weight: .light))
-                .foregroundStyle(.green.opacity(0.85))
+            Image("islemascot-default")
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+                .frame(height: 52)
             Text("Inbox zero")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.9))

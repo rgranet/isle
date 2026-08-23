@@ -477,16 +477,7 @@ struct NotchClipboardList: View {
                         .padding(.horizontal, 16)
                         .padding(.bottom, 20)
                     }
-
-                    LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 16)
-                        .allowsHitTesting(false)
-                        .frame(maxHeight: .infinity, alignment: .top)
-
-                    LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 16)
-                        .allowsHitTesting(false)
-                        .frame(maxHeight: .infinity, alignment: .bottom)
+                    .fadedVerticalEdges(height: 16)
                 }
             }
         }
@@ -785,16 +776,7 @@ struct NoteListView: View {
                         .padding(.horizontal, 16)
                         .padding(.bottom, 20)
                     }
-
-                    LinearGradient(colors: [Color.black.opacity(0.65), .clear], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 16)
-                        .allowsHitTesting(false)
-                        .frame(maxHeight: .infinity, alignment: .top)
-
-                    LinearGradient(colors: [.clear, Color.black.opacity(0.65)], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 16)
-                        .allowsHitTesting(false)
-                        .frame(maxHeight: .infinity, alignment: .bottom)
+                    .fadedVerticalEdges(height: 16)
                 }
             }
         }
@@ -939,7 +921,7 @@ struct NoteRow: View {
                     .padding(.vertical, isCompact ? 2 : 3)
                     .background(
                         Capsule()
-                            .fill(Color(white: 0.12)) // Softer dark gray, not solid black
+                            .fill(Color.white.opacity(0.12)) // Translucent — integrates with the glass surface
                             .overlay(
                                 Capsule()
                                     .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -1145,7 +1127,6 @@ struct NoteEditorView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure VStack takes full space
-        .background(Color.black) // Ensure solid background
         .onAppear {
             if isNew {
                 isContentFocused = true

@@ -4330,6 +4330,8 @@ struct Appearance: View {
     @Default(.selectedAppIconID) private var selectedAppIconID
     @Default(.openNotchWidth) var openNotchWidth
     @Default(.enableMinimalisticUI) var enableMinimalisticUI
+    @Default(.enableNotchLiquidGlass) private var enableNotchLiquidGlass
+    @Default(.notchLiquidGlassDimming) private var notchLiquidGlassDimming
     @Default(.lockScreenGlassCustomizationMode) private var lockScreenGlassCustomizationMode
     @Default(.lockScreenGlassStyle) private var lockScreenGlassStyle
     @Default(.lockScreenMusicLiquidGlassVariant) private var lockScreenMusicLiquidGlassVariant
@@ -4423,6 +4425,32 @@ struct Appearance: View {
                 .settingsHighlight(id: highlightID("Use simpler close animation"))
             } header: {
                 Text("General")
+            }
+
+            Section {
+                Defaults.Toggle(key: .enableNotchLiquidGlass) {
+                    Text("Liquid glass surface")
+                }
+                .settingsHighlight(id: highlightID("Liquid glass surface"))
+                Defaults.Toggle(key: .enableNotchDock) {
+                    Text("Floating dock")
+                }
+                .settingsHighlight(id: highlightID("Floating dock"))
+                if enableNotchLiquidGlass {
+                    HStack {
+                        Text("Bottom darkness")
+                        Slider(value: $notchLiquidGlassDimming, in: 0...1)
+                        Text(notchLiquidGlassDimming, format: .percent.precision(.fractionLength(0)))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Open Notch")
+            } footer: {
+                Text("Progressive Siri-style glass: the open notch stays black at the top and melts into frosted glass toward the bottom edge. Lower darkness = more wallpaper glow. The closed notch always stays black to blend with the camera housing.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             // Show display style picker only on non-notch Macs (main screen has no physical notch)
